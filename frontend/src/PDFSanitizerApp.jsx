@@ -1063,7 +1063,7 @@ function ExistingClientPage({ pdfFiles, clientName, onBack, onTreatAsNew, onProc
 
   // Gate run with canProceed (Existing: LLM terms only)
   const hasLlmTerms = Array.isArray(llmTerms) && llmTerms.length > 0;
-  const canProceed = hasLlmTerms;
+  const canProceed = hasLlmTerms || mode === "use-existing";
 
   // We'll ask the parent App to switch to the New Client flow when needed.
   // We'll pass this as a prop shortly.
@@ -1676,6 +1676,7 @@ export default function App() {
     </main>
   );
 }
+
 
 
 
