@@ -587,7 +587,7 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
           <button className="btn" onClick={onBack} type="button">
             <IconChevronLeft className="h-4 w-4" /> Back
           </button>
-          <h1 className="text-xl font-semibold" style={{margin:0}}>Wootz.Sanitize</h1>
+          <h1 className="text-xl font-semibold" style={{margin:0}}>Wootz.Sanitize.Test</h1> 
           <span className="muted" style={{fontSize:12}}>/ New client: {clientName}</span>
         </header>
 
