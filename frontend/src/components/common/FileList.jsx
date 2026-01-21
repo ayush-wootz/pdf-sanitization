@@ -1,12 +1,12 @@
 import React from 'react';
 import { IconX } from '../assets/icons';
 
-/*
-FileList Component
-Displays a list of uploaded PDF files with remove buttons
-
-@param {Array} files - Array of File objects
-@param {Function} onRemove - Callback when remove button is clicked (index)
+/**
+ * FileList Component
+ * Displays a list of uploaded PDF files with remove buttons
+ *
+ * @param {Array} files - Array of File objects
+ * @param {Function} onRemove - Callback when remove button is clicked (index)
 */
 
 export default function FileList({ files, onRemove }) {
