@@ -4,6 +4,9 @@ import json
 import requests
 import textwrap
 import re
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 # ——— API Configuration ———
