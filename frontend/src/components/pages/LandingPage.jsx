@@ -111,7 +111,7 @@ export default function LandingPage({
                                 <div className="template" style={{marginTop: 18}}>
                                     <label className="label">Template</label>
                                     <select
-                                        className="input"
+                                        className="select"
                                         value={selectedTemplate}
                                         onChange = {(e) => onTemplateChange(e.target.value)}
                                         disabled={isLoading}
