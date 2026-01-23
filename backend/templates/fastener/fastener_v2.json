@@ -1,0 +1,31 @@
+{
+  "rectangles": [
+    {
+      "page": 0,
+      "bbox": [
+        50,
+        686,
+        287,
+        757
+      ],
+      "paper": "A3",
+      "orientation": "H",
+      "source_index": 0,
+      "source_pdf": "6C3508.PDF"
+    }
+  ],
+  "contents": [
+    {
+      "page": 0,
+      "bbox": [
+        50.0,
+        686.0,
+        287.0,
+        757.0
+      ],
+      "text": "",
+      "image_hash": "fa5a84852f2fd0d2"
+    }
+  ],
+  "image_map": {}
+}

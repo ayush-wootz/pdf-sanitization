@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./home.css";
 import PDFViewer from "./components/pdf/PDFViewer";
+import RectanglesList from "./components/rectangles/RectanglesList";
+import LLMTermsSection from "./components/terms/LLMTermsSection";
 
 // Backend base URL (set Vercel env: VITE_API_BASE=https://<your-render>.onrender.com)
  const API_BASE = "http://localhost:8000"
@@ -131,8 +133,6 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
   const [activeIndex,setActiveIndex]=useState(0);
   const [rects,setRects]=useState([]);                 // {id,x,y,w,h} normalized
   const [rectActions,setRectActions]=useState({});      // id -> { action: 'redact'|'logo', logoFile?: File }
-  //const [draft,setDraft]=useState(null);                // {x,y,w,h} in px while drawing
-  //const [renderError,setRenderError]=useState("");
   const [templateFileIdx, setTemplateFileIdx] = useState(null);
   const [pageIndex, setPageIndex] = useState(0);   // 0-based current page
   const [pageCount, setPageCount] = useState(1);   // total pages (set after pdf load)
@@ -158,7 +158,6 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
   // Step 2 inputs
   const [step,setStep]=useState(1);                     // 1: rectangles; 2: LLM + run; 3: results
   const [threshold,setThreshold]=useState(0.9);
-  //const [pageMeta, setPageMeta] = useState(null);
   
   // LLM term generation states
   const [llmTerms, setLlmTerms] = useState([]);         // [{term: "ABC", replacement: ""}, ...]
@@ -310,143 +309,6 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
     return Object.keys(hit.low_rects || {}).map(n => Number(n)).sort((a,b)=>a-b);
   }, [isSecondaryMode, lastLowConf, currentFiles, activeIndex]);
 
-
-  //const pdfCanvasRef=useRef(null), overlayRef=useRef(null), wrapRef=useRef(null);
-  //const [renderScale, setRenderScale] = useState(1); // scale down the PDF view while keeping stable coordinates
-
-  // Render first page to canvas
-  /*useEffect(()=>{let cancelled=false;
-    async function render(){setRenderError(""); const canvas=pdfCanvasRef.current; if(!canvas||!file) return;
-      try{
-        await ensurePdfJs(); const data=await file.arrayBuffer();
-        const task=window.pdfjsLib.getDocument({data}); 
-        const pdf=await task.promise; 
-        const total = pdf.numPages || pdf._pdfInfo?.numPages || 1;
-        setPageCount(total);
-
-        // Clamp index
-        const pno = Math.min(Math.max(0, pageIndex), total - 1);
-        const page = await pdf.getPage(pno + 1);
-        // Base viewport (scale 1) for stable PDF-space coordinates
-        const baseVp = page.getViewport({ scale: 1 });
-        // Fit into container and apply user renderScale, preventing overflow
-        const maxW = wrapRef.current ? Math.max(320, wrapRef.current.clientWidth || 800) : 800;
-        const fitScale = Math.min(1, maxW / baseVp.width);
-        const scale = Math.min(renderScale, fitScale);
-        const vp = page.getViewport({ scale });
-
-        // classify page size by your buckets in PDF points
-        function classifySize(w, h) {
-          const maxDim = Math.max(w, h);
-          if (maxDim > 2000) return "A1";
-          if (maxDim > 1500) return "A2";
-          if (maxDim > 1100) return "A3";
-          return "A4";
-        }
-
-        const meta = {
-          pageNo: pno,
-          width: Math.floor(baseVp.width),
-          height: Math.floor(baseVp.height),
-          sizeClass: classifySize(baseVp.width, baseVp.height),
-          orientation: baseVp.width >= baseVp.height ? "H" : "V"
-        };
-        setPageMeta(meta);
-
-        const ctx=canvas.getContext("2d"); 
-        canvas.width=Math.floor(vp.width); 
-        canvas.height=Math.floor(vp.height);
-        // Keep CSS size equal to pixel size for accurate overlay mapping
-        canvas.style.width  = `${Math.floor(vp.width)}px`;
-        canvas.style.height = `${Math.floor(vp.height)}px`;
-        if (overlayRef.current) {
-          overlayRef.current.width  = canvas.width;
-          overlayRef.current.height = canvas.height;
-          overlayRef.current.style.width  = `${canvas.width}px`;
-          overlayRef.current.style.height = `${canvas.height}px`;
-        }
-        await page.render({canvasContext:ctx,viewport:vp}).promise; if(cancelled) return;
-      }catch(err){console.error(err); setRenderError("Failed to render PDF first page.");}
-    }
-    render(); return()=>{cancelled=true;};
-  },[file, pageIndex, renderScale]);*/
-
-  // Draw overlay (rects + draft)
-  /*useEffect(()=>{const overlay=overlayRef.current; if(!overlay) return; const ctx=overlay.getContext("2d");
-    ctx.clearRect(0,0,overlay.width,overlay.height);
-  const sx = (pageMeta?.width && overlay.width) ? (overlay.width / pageMeta.width) : 1;
-  const sy = (pageMeta?.height && overlay.height) ? (overlay.height / pageMeta.height) : 1;
-  rects
-    .filter(r => r.fileIdx === activeIndex && (r.page ?? 0) === (pageMeta?.pageNo ?? 0))
-    .forEach(r => {
-    const x = Math.round(r.x * sx);
-    const y = Math.round(r.y * sy);
-    const w = Math.round(r.w * sx);
-    const h = Math.round(r.h * sy);
-    ctx.strokeStyle = "rgba(255,0,0,0.9)";
-    ctx.lineWidth = 2;
-    ctx.setLineDash([6, 4]);
-    ctx.strokeRect(x, y, w, h);
-    ctx.setLineDash([]);
-});
-    if(draft){ctx.strokeStyle="rgba(0,200,255,0.9)"; ctx.lineWidth=2; ctx.setLineDash([4,3]); ctx.strokeRect(draft.x,draft.y,draft.w,draft.h); ctx.setLineDash([]);}
-  },[rects, draft, activeIndex, pageMeta]);*/
-
-  // Drawing handlers (Pointer Events)
-  //const startRef=useRef(null); const drawingRef=useRef(false);
-  //const [confirmUI,setConfirmUI]=useState(null);
-
-  /*const onPointerDown=e=>{if(!overlayRef.current) return; e.preventDefault();
-    overlayRef.current.setPointerCapture?.(e.pointerId);
-    const r=overlayRef.current.getBoundingClientRect();
-    const x=e.clientX-r.left, y=e.clientY-r.top; startRef.current={x,y}; drawingRef.current=true; setDraft({x,y,w:0,h:0});};
-  const onPointerMove=e=>{if(!drawingRef.current||!overlayRef.current||!startRef.current) return; e.preventDefault();
-    const r=overlayRef.current.getBoundingClientRect(); const x2=e.clientX-r.left,y2=e.clientY-r.top;
-    const x=Math.min(startRef.current.x,x2), y=Math.min(startRef.current.y,y2);
-    const w=Math.abs(x2-startRef.current.x), h=Math.abs(y2-startRef.current.y); setDraft({x,y,w,h});};
-  const onPointerUp=e=>{if(!drawingRef.current) return; e.preventDefault(); drawingRef.current=false;
-    overlayRef.current.releasePointerCapture?.(e.pointerId);
-    if(!draft||draft.w<4||draft.h<4){setDraft(null);setConfirmUI(null);return;}
-    // Place confirm/cancel near the released rectangle, clamped to stay in view
-    const ov = overlayRef.current;
-    const pad = 8;
-    const approxW = 220; // approximate panel width
-    const approxH = 44;  // approximate panel height
-    let left = draft.x + draft.w + pad;
-    let top  = draft.y + draft.h + pad;
-    if (ov) {
-      const cw = (ov.clientWidth || 0);
-      const ch = (ov.clientHeight || 0);
-      left = Math.max(pad, Math.min(left, cw - approxW - pad));
-      top  = Math.max(pad, Math.min(top, ch - approxH - pad));
-    }
-    setConfirmUI({left, top});};
-
-  const confirmDraft=()=>{
-    if (!overlayRef.current || !draft) return;
-    const id = String(Date.now()) + "-" + Math.random().toString(36).slice(2);
-    if (templateFileIdx === null) {
-      setTemplateFileIdx(activeIndex);
-    }
-    // Store coordinates in base (scale=1) PDF units so they remain correct across zoom changes
-    const sx = (overlayRef.current?.width && pageMeta?.width) ? (pageMeta.width / overlayRef.current.width) : 1;
-    const sy = (overlayRef.current?.height && pageMeta?.height) ? (pageMeta.height / overlayRef.current.height) : 1;
-    setRects(prev => [...prev, {
-      id,
-      x: Math.round(draft.x * sx),
-      y: Math.round(draft.y * sy),
-      w: Math.round(draft.w * sx),
-      h: Math.round(draft.h * sy),
-      // NEW: capture the source you drew on
-      fileIdx: activeIndex,
-      page: (pageMeta?.pageNo ?? 0),
-      paper: (pageMeta?.sizeClass ?? "A4"),
-      orientation: (pageMeta?.orientation ?? "H"),
-    }]);
-    setRectActions(prev => ({ ...prev, [id]: { action: "redact" } }));
-    setDraft(null); setConfirmUI(null);
-  };
-  const cancelDraft=()=>{setDraft(null); setConfirmUI(null);};*/
   const removeRect=id=>{
     setRects(prev=>prev.filter(r=>r.id!==id));
     setRectActions(prev=>{const n={...prev}; delete n[id]; return n;});
@@ -535,29 +397,7 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
     setLastLowConf(lowConf);
     setLastZipUrl(payload.zip_url ? absApiUrl(payload.zip_url) : "");
     setSecondaryClient(clientName);
-    
-    // Optionally: surface outputs list somewhere (you previously opened a popup);
-    // now you can render a button that uses payload.zip_url to download any time.
 
-     // previously for auto zip download 
-    // const res = await fetch(`${API_BASE}/api/sanitize`, { method: "POST", body: form });
-    // if (!res.ok) { alert("Backend error while sanitizing."); return; }
-    // const contentType = res.headers.get("content-type") || "";
-
-    // if (contentType.includes("application/zip")) {
-    //   const blob = await res.blob();
-    //   const downloadUrl = window.URL.createObjectURL(blob);
-    //   const a = document.createElement("a");
-    //   a.href = downloadUrl;
-    //   a.download = `${clientName}_sanitized_pdfs.zip`; // You can customize the name if needed
-    //   document.body.appendChild(a);
-    //   a.click();
-    //   a.remove();
-    //   window.URL.revokeObjectURL(downloadUrl);
-    //   return;
-    // }
-    // Optional: show which template id was created, e.g., acme_v1 (fallback for older JSON-based response)
-    // const payload = await res.json();
     if (payload.template_id) {
       console.log("Saved template:", payload.template_id);
     }
@@ -594,143 +434,6 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
         </header>
 
         <div className="grid-2">
-          {/* LEFT: PDF Viewer - 3/4 width */}
-          {/*<section className="panel section">
-            <div className="mb-3 flex items-center justify-between">
-              <div className="text-sm text-neutral-300">
-                Preview: <span className="text-neutral-100 font-medium">{file ? file.name : "No file"}</span>
-              </div>
-              <div className="flex items-center gap-2"><IconEye className="text-neutral-400" /><span className="text-xs text-neutral-400">Showing PDFs to draw rectangles</span></div>
-            </div>
-
-            <div className="flex gap-2 mb-3 overflow-auto">
-              {currentFiles
-                .map((f, i) => ({ f, i }))       // pair file with original index
-                .filter(({ f }) => f.name.toLowerCase().endsWith(".pdf"))
-                .map(({ f, i }) => (
-                  <button
-                    key={`${f.name}-${i}`}
-                    className={`text-xs rounded-lg border px-2 py-1 ${
-                      i === activeIndex
-                        ? "border-emerald-600 bg-emerald-600 text-white"
-                        : "border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-750"
-                    }`}
-                    onClick={() => setActiveIndex(i)}
-                    type="button"
-                  >
-                    {f.name}
-                    {templateFileIdx === i ? "  • template" : ""}
-                  </button>
-              ))}
-            </div>*/}
-            {/* Page navigation */}
-            {/*<div className="mb-2 flex justify-center text-sm">
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setPageIndex(p => Math.max(0, p - 1))}
-                  className="btn"
-                  disabled={pageIndex <= 0}
-                >
-                  ← Prev
-                </button>
-            
-                <span className="text-neutral-400">
-                  Page {pageIndex + 1} / {pageCount}
-                </span>
-            
-                <button
-                  type="button"
-                  onClick={() => setPageIndex(p => Math.min(pageCount - 1, p + 1))}
-                  className="btn"
-                  disabled={pageIndex >= pageCount - 1}
-                >
-                  Next →
-                </button>
-              </div>
-            </div>*/}
-
-            
-            {/* Quick-jump chips (secondary mode only) */}
-            {/*{isSecondaryMode && lastLowConf && lastLowConf.length > 0 && (() => {
-              const currentBase = (file?.name || "").replace(/_sanitized\.pdf$/i, ".pdf");
-              const entry = lastLowConf.find(it => (it.pdf || "").endsWith(currentBase));
-              const pages = entry
-                ? Object.entries(entry.low_rects || {})
-                    // accept both new shape (array of bboxes) and old (single bbox)
-                    .filter(([_, v]) => (Array.isArray(v) ? v.length > 0 : !!v))
-                    .map(([k]) => Number(k))
-                    .sort((a, b) => a - b)
-                : [];
-
-              return pages.length ? (
-                <div className="mb-3 flex flex-wrap gap-2 text-xs">
-                  <span className="text-neutral-400">Jump to low-confidence pages:</span>
-                  {pages.map(p0 => (
-                    <button
-                      key={p0}
-                      type="button"
-                      onClick={() => setPageIndex(Number(p0))}
-                      className="rounded-full border border-amber-600/60 px-2 py-0.5 hover:bg-amber-900/30"
-                      title="Go to page"
-                    >
-                      {Number(p0) + 1}
-                    </button>
-                  ))}
-                </div>
-              ) : null;
-            })()}*/}
-  
-            
-            {/* Remove current PDF from batch */}
-            {/*{isSecondaryMode && (
-              <div className="mb-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const copy = [...secondaryFiles];
-                    copy.splice(activeIndex, 1);
-                    if (copy.length === 0) {
-                      setIsSecondaryMode(false);
-                      setSecondaryFiles([]);
-                    } else {
-                      setSecondaryFiles(copy);
-                      setActiveIndex(i => Math.min(i, copy.length - 1));
-                    }
-                  }}
-                  className="inline-flex items-center gap-1 rounded-md border border-rose-700/70 px-2 py-1 text-xs hover:bg-rose-900/30"
-                >
-                  <IconTrash2 /> Remove this PDF
-                </button>
-              </div>
-            )}*/}
-
-            {/* Wrapper MUST be positioning context for overlay; also force position via style to avoid CSS framework issues */}
-            {/*<div ref={wrapRef} className="relative w-full overflow-auto" style={{ position: "relative" }}>
-              <canvas ref={pdfCanvasRef} className="block " />
-              <canvas
-                ref={overlayRef}
-                // inline styles ensure absolute overlay even if utility classes aren't loaded
-                style={{position:"absolute", inset:0, zIndex:10, cursor:"crosshair", touchAction:"none"}}
-                onPointerDown={onPointerDown}
-                onPointerMove={onPointerMove}
-                onPointerUp={onPointerUp}
-              />
-              {confirmUI&&draft&&(
-                <div className="absolute z-20 rounded-xl border border-neutral-700 bg-neutral-900 text-sm shadow-md"
-                     style={{left:confirmUI.left, top:confirmUI.top}}>
-                  <div className="flex">
-                    <button type="button" className="px-3 py-1.5 hover:bg-neutral-800 border-r border-neutral-800 inline-flex items-center gap-1" onClick={confirmDraft}><IconCheck />Confirm</button>
-                    <button type="button" className="px-3 py-1.5 hover:bg-neutral-800 inline-flex items-center gap-1" onClick={cancelDraft}><IconX />Cancel</button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {renderError && <div className="mt-3 text-sm text-rose-400">{renderError}</div>}
-            <p className="mt-3 text-xs text-neutral-500">Tip: click–drag on the preview to draw a rectangle. Release to confirm.</p>
-          </section>*/}
-
           {/* LEFT: PDF Viewer - 3/4 width. Updated on 22th Jan 2026 */} <section className="panel section">
             <PDFViewer
                 files={currentFiles}
@@ -788,252 +491,91 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
                 </>
               )}
             </div>
-
+            
             {step === 1 ? (
-              <div>
-                <h2 className="text-sm font-semibold text-neutral-200 mb-2">Mark images to remove / place logos</h2>
-                <p className="text-xs text-neutral-500 mb-4">
-                  Draw rectangles on the left preview. Each rectangle can be redacted or replaced with a logo.
-                </p>
+                <div>
+                    <h2 className="text-sm font-semibold text-neutral-200 mb-2">
+                    Mark images to remove / place logos
+                    </h2>
+                    <p className="text-xs text-neutral-500 mb-4">
+                    Draw rectangles on the left preview. Each rectangle can be redacted or replaced with a logo.
+                    </p>
 
-                {rects.length===0?(
-                  <div className="text-sm text-neutral-400">No rectangles added yet.</div>
-                ):(
-                  <ul className="space-y-2">
-                    {rects.map((r,idx)=>(
-                      <li key={r.id} className="rounded-xl border border-neutral-800 bg-neutral-900 p-3 text-sm">
-                        <div className="flex items-center justify-between">
-                          <div className="font-medium text-neutral-200">Rectangle #{idx+1}</div>
-                          <button type="button" className="inline-flex items-center gap-1 rounded-lg border border-neutral-700 px-2 py-1 text-xs text-neutral-300 hover:bg-neutral-800"
-                                  onClick={()=>removeRect(r.id)} title="Remove rectangle">
-                            <IconTrash2 /> Remove
-                          </button>
-                        </div>
-
-                        <div className="mt-1 text-xs text-neutral-500">
-                          x:{r.x}, y:{r.y}, w:{r.w}, h:{r.h} (px)
-                        </div>
-
-                        {/* Action selector */}
-                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                          <label className="text-xs text-neutral-300">
-                            Action
-                            <select
-                              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-1 text-xs"
-                              value={rectActions[r.id]?.action || "redact"}
-                              onChange={(e)=>{
-                                const action = e.target.value === "logo" ? "logo" : "redact";
-                                setRectActions(prev=>({
-                                  ...prev,
-                                  [r.id]: { action, logoFile: action==="logo" ? prev[r.id]?.logoFile || null : undefined }
-                                }));
-                              }}
-                            >
-                              <option value="redact">Redact this rectangle (no replacement)</option>
-                              <option value="logo">Insert logo here at this place</option>
-                            </select>
-                          </label>
-
-                          {/* Logo upload when needed */}
-                          {rectActions[r.id]?.action === "logo" && (
-                            <label className="text-xs text-neutral-300">
-                              Upload logo
-                              <input
-                                type="file"
-                                accept=".png,.jpg,.jpeg,.webp,.svg"
-                                className="mt-1 block w-full rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-1 text-xs file:mr-3 file:rounded file:border-0 file:bg-neutral-700 file:px-3 file:py-1"
-                                onChange={async (e)=>{
-                                  const f = e.target.files?.[0] || null;
-                                  if (!f) {
-                                    setRectActions(prev=>({...prev,[r.id]:{ action:"logo", logoFile:null, logoKey:undefined }}));
-                                    return;
-                                  }
-                                  const maxKB = 100;
-                                  if (f.size / 1024 > maxKB) {
-                                    alert(`Please upload a logo smaller than ${maxKB} KB.`);
-                                    return;
-                                  }
-                                  // 1) upload to backend -> returns { key: "logos/<filename>" }
-                                  const fd = new FormData();
-                                  fd.append("file", f);
-                                  let key;
-                                  try {
-                                    const resp = await fetch(`${API_BASE}/api/upload-logo`, { method: "POST", body: fd });
-                                    if (!resp.ok) throw new Error(`Logo upload failed (${resp.status})`);
-                                    const js = await resp.json();
-                                    key = js.key;
-                                  } catch (err) {
-                                    alert(`Logo upload failed. ${err?.message || err}`);
-                                    return;
-                                  }
-                                  // 2) store both file (for UI display) and key (for API image_map)
-                                  setRectActions(prev=>({...prev,[r.id]:{ action:"logo", logoFile:f, logoKey:key }}));
-                                }}
-                              />
-                              {rectActions[r.id]?.logoFile && (
-                                <div className="mt-1 text-neutral-400">{rectActions[r.id].logoFile.name}{rectActions[r.id]?.logoKey ? (<span className="ml-2 text-xs text-emerald-400">({rectActions[r.id].logoKey})</span>) : null}</div>
-                              )}
-                            </label>
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-
-                <div className="mt-4 flex justify-end">
-                  <button type="button" onClick={()=>setStep(2)} className="btn">
-                    Next: Text & Run →
-                  </button>
-                </div>
-              </div>
-            ) : step === 2 ? (
-              <div>
-                {/* Step 2: Text + Run */}
-                
-                {/* LLM Term Generation Section */}
-                <div className="mb-6 rounded-xl border border-neutral-800 bg-neutral-900/40 p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-sm font-semibold text-neutral-200">Generate sensitive terms using LLM</h2>
-                    <button
-                      type="button"
-                      onClick={generateSensitiveTerms}
-                      disabled={isGeneratingTerms || !currentFiles.length}
-                      className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-xs text-white hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isGeneratingTerms ? (
-                        <>
-                          <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <IconPlus className="h-3 w-3" />
-                          Generate Terms
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  
-                  <div className="mb-3">
-                    <label className="text-xs text-neutral-300 mb-1 block">
-                      Custom context (optional)
-                    </label>
-                    <textarea
-                      value={llmContext}
-                      onChange={e => setLlmContext(e.target.value)}
-                      rows={2}
-                      placeholder="Provide additional context for the LLM to better identify sensitive terms..."
-                      className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-1 text-xs placeholder:text-neutral-500"
+                    <RectanglesList
+                    rects={rects}
+                    rectActions={rectActions}
+                    onRemove={removeRect}
+                    onActionChange={(id, action) => {
+                        setRectActions(prev => ({
+                        ...prev,
+                        [id]: {
+                            action,
+                            logoFile: action === "logo" ? prev[id]?.logoFile || null : undefined,
+                        }
+                        }));
+                    }}
+                    onLogoUpload={(id, file, key) => {
+                        setRectActions(prev => ({
+                        ...prev,
+                        [id]: { action: "logo", logoFile: file, logoKey: key }
+                        }));
+                    }}
+                    apiBase={API_BASE}
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-xs font-medium text-neutral-300">Terms ({llmTerms.length})</h3>
-                    </div>
 
-                    <div className="max-h-60 overflow-y-auto space-y-2">
-                      {llmTerms.length === 0 ? (
-                        <div className="text-xs text-neutral-400">No terms yet. Add terms manually or generate via LLM.</div>
-                      ) : (
-                        llmTerms.map((item, index) => (
-                          <div key={index} className="flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 p-2">
-                            <div className="flex-1 grid grid-cols-2 gap-2">
-                              <div>
-                                <label className="text-xs text-neutral-400 block mb-1">Term</label>
-                                <input
-                                  type="text"
-                                  value={item.term}
-                                  onChange={e => updateLlmTermText(index, e.target.value)}
-                                  placeholder="Sensitive term"
-                                  className="w-full rounded border border-neutral-600 bg-neutral-700 px-2 py-1 text-xs text-neutral-200 placeholder:text-neutral-500"
-                                />
-                              </div>
-                              <div>
-                                <label className="text-xs text-neutral-400 block mb-1">Replace with</label>
-                                <input
-                                  type="text"
-                                  value={item.replacement}
-                                  onChange={e => updateLlmTermReplacement(index, e.target.value)}
-                                  placeholder="Leave blank to redact"
-                                  className="w-full rounded border border-neutral-600 bg-neutral-700 px-2 py-1 text-xs text-neutral-200 placeholder:text-neutral-500"
-                                />
-                              </div>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => removeLlmTerm(index)}
-                              className="inline-flex items-center justify-center rounded border border-red-600 bg-red-600 p-1 text-white hover:bg-red-500"
-                              title="Remove term"
-                            >
-                              <IconX className="h-3 w-3" />
-                            </button>
-                          </div>
-                        ))
-                      )}
-                    </div>
-
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={addNewLlmTerm}
-                        className="inline-flex items-center gap-1 rounded border border-neutral-600 bg-neutral-700 px-2 py-1 text-xs text-neutral-300 hover:bg-neutral-600"
-                      >
-                        <IconPlus className="h-3 w-3" />
-                        Add Term
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-
-                <div className="mt-4 flex items-center justify-between gap-3">
-                  <div className="text-xs text-neutral-300">
-                    Threshold:&nbsp;
-                    <input type="number" step="0.01" min="0" max="1" value={threshold}
-                           onChange={e=>setThreshold(parseFloat(e.target.value)||0)}
-                           className="rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-1 text-xs"/>
-                  </div>
-                  <div className="flex gap-2">
-                    <button type="button" onClick={()=>setStep(1)} className="btn">← Back</button>
-                    <button
-                      type="button"
-                      onClick={runSanitization}
-                      disabled={!canProceed || isProcessing}
-                      className={`btn btn-primary ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                      {isProcessing ? (
-                        <>
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2"></div>
-                          Processing...
-                        </>
-                      ) : (
-                        <>
-                          <IconCheck /> Run Sanitization
-                        </>
-                      )}
+                    <div className="mt-4 flex justify-end">
+                    <button type="button" onClick={()=>setStep(2)} className="btn">
+                        Next: Text & Run →
                     </button>
-                    
-                    {/* Progress Bar */}
-                    {isProcessing && (
-                      <div className="mt-4">
-                        <div className="flex items-center justify-between text-xs text-neutral-400 mb-1">
-                          <span>Processing PDFs...</span>
-                          <span>{processingProgress}%</span>
-                        </div>
-                        <div className="w-full bg-neutral-700 rounded-full h-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
-                            style={{ width: `${processingProgress}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    )}
-
-                  </div>
+                    </div>
                 </div>
-              </div>
-              ) : (
+            ) : step === 2 ? (
+                <div>
+                    {/* LLM Terms Section */}
+                    <LLMTermsSection
+                    terms={llmTerms}
+                    context={llmContext}
+                    isGenerating={isGeneratingTerms}
+                    hasFiles={currentFiles.length > 0}
+                    onContextChange={setLlmContext}
+                    onGenerate={generateSensitiveTerms}
+                    onTermChange={updateLlmTermText}
+                    onReplacementChange={updateLlmTermReplacement}
+                    onRemoveTerm={removeLlmTerm}
+                    onAddTerm={addNewLlmTerm}
+                    />
+
+                    {/* Threshold + Run Button */}
+                    <div className="mt-4 flex items-center justify-between gap-3">
+                    <div className="text-xs text-neutral-300">
+                        Threshold:&nbsp;
+                        <input type="number" step="0.01" min="0" max="1" value={threshold}
+                            onChange={e=>setThreshold(parseFloat(e.target.value)||0)}
+                            className="rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-1 text-xs"/>
+                    </div>
+                    <div className="flex gap-2">
+                        <button type="button" onClick={()=>setStep(1)} className="btn">← Back</button>
+                        <button
+                        type="button"
+                        onClick={runSanitization}
+                        disabled={!canProceed || isProcessing}
+                        className={`btn btn-primary ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                        {isProcessing ? (
+                            <>
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2"></div>
+                            Processing...
+                            </>
+                        ) : (
+                            <>
+                            <IconCheck /> Run Sanitization
+                            </>
+                        )}
+                        </button>
+                    </div>
+                    </div>
+                </div>
+            ) : (
                 <div>
                   {/* Step 3: Results */}
                   {(lastZipUrl || (lastLowConf && lastLowConf.length > 0)) ? (
