@@ -18,7 +18,7 @@ export async function ensurePDFJs() {
     });
 
     // Load PDF.js worker
-    await new Proimise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
         const script = document.createElement("script");
         script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
         script.onload = resolve;

@@ -1,0 +1,259 @@
+/* PDF Viewer Styles */
+
+.pdf-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Header */
+.pdf-viewer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.pdf-viewer-title {
+  font-size: 0.875rem;
+  color: #d1d5db;
+}
+
+.pdf-viewer-title .font-medium {
+  color: #f3f4f6;
+  font-weight: 500;
+}
+
+.pdf-viewer-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+/* File Tab Bar */
+.file-tab-bar {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.file-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #262626;
+  border: 1px solid #404040;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  color: #d1d5db;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.file-tab:hover {
+  background: #2a2a2a;
+  border-color: #525252;
+}
+
+.file-tab.active {
+  background: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.file-tab-name {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.template-badge {
+  font-size: 0.65rem;
+  opacity: 0.8;
+}
+
+/* Page Navigation */
+.page-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.btn-nav {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.page-indicator {
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
+/* Low Confidence Chips */
+.low-confidence-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 0.5rem;
+}
+
+.chip-label {
+  font-size: 0.75rem;
+  color: #fbbf24;
+  font-weight: 500;
+}
+
+.chip {
+  padding: 0.25rem 0.625rem;
+  background: transparent;
+  border: 1px solid rgba(251, 191, 36, 0.6);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  color: #fbbf24;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chip:hover {
+  background: rgba(251, 191, 36, 0.2);
+}
+
+/* PDF Canvas Wrapper */
+.pdf-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: auto;
+  background: #171717;
+  border: 1px solid #2a2a2a;
+  border-radius: 0.5rem;
+  min-height: 400px;
+}
+
+.pdf-canvas {
+  display: block;
+  margin: 0 auto;
+}
+
+.pdf-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+.pdf-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #ef4444;
+  font-size: 0.875rem;
+}
+
+/* Drawing Overlay */
+/*.drawing-overlay { */
+  /* Positioned absolutely via inline styles */
+/*}*/
+
+/* Confirm/Cancel UI */
+.confirm-cancel-ui {
+  /* Positioned absolutely via inline styles */
+  background: #1a1a1a;
+  border: 1px solid #404040;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.confirm-cancel-buttons {
+  display: flex;
+}
+
+.btn-confirm {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  background: transparent;
+  border: none;
+  border-right: 1px solid #2a2a2a;
+  color: #10b981;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  justify-content: center;
+}
+
+.btn-confirm:hover {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  justify-content: center;
+}
+
+.btn-cancel:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* PDF Tip */
+.pdf-tip {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .pdf-viewer-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .file-tab-bar {
+    flex-direction: column;
+  }
+
+  .file-tab {
+    width: 100%;
+  }
+
+  .page-navigation {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .low-confidence-chips {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

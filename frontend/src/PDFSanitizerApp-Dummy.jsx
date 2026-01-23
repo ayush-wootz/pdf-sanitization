@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./home.css";
+import PDFViewer from "./components/pdf/PDFViewer";
+
 // Backend base URL (set Vercel env: VITE_API_BASE=https://<your-render>.onrender.com)
- const API_BASE = String(process.env.REACT_APP_API_BASE || "").replace(/\/+$/, "");
+ const API_BASE = "http://localhost:8000"
 
 /* ================== Inline Icon Components ================== */
 function IconUploadCloud(props){return(<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" {...props}><path d="M3 15a4 4 0 0 0 4 4h10a5 5 0 0 0 0-10 7 7 0 0 0-13 2" /><path d="M12 12v9" /><path d="m16 16-4-4-4 4" /></svg>);}
@@ -129,8 +131,8 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
   const [activeIndex,setActiveIndex]=useState(0);
   const [rects,setRects]=useState([]);                 // {id,x,y,w,h} normalized
   const [rectActions,setRectActions]=useState({});      // id -> { action: 'redact'|'logo', logoFile?: File }
-  const [draft,setDraft]=useState(null);                // {x,y,w,h} in px while drawing
-  const [renderError,setRenderError]=useState("");
+  //const [draft,setDraft]=useState(null);                // {x,y,w,h} in px while drawing
+  //const [renderError,setRenderError]=useState("");
   const [templateFileIdx, setTemplateFileIdx] = useState(null);
   const [pageIndex, setPageIndex] = useState(0);   // 0-based current page
   const [pageCount, setPageCount] = useState(1);   // total pages (set after pdf load)
@@ -156,7 +158,7 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
   // Step 2 inputs
   const [step,setStep]=useState(1);                     // 1: rectangles; 2: LLM + run; 3: results
   const [threshold,setThreshold]=useState(0.9);
-  const [pageMeta, setPageMeta] = useState(null);
+  //const [pageMeta, setPageMeta] = useState(null);
   
   // LLM term generation states
   const [llmTerms, setLlmTerms] = useState([]);         // [{term: "ABC", replacement: ""}, ...]
@@ -309,11 +311,11 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
   }, [isSecondaryMode, lastLowConf, currentFiles, activeIndex]);
 
 
-  const pdfCanvasRef=useRef(null), overlayRef=useRef(null), wrapRef=useRef(null);
-  const [renderScale, setRenderScale] = useState(1); // scale down the PDF view while keeping stable coordinates
+  //const pdfCanvasRef=useRef(null), overlayRef=useRef(null), wrapRef=useRef(null);
+  //const [renderScale, setRenderScale] = useState(1); // scale down the PDF view while keeping stable coordinates
 
   // Render first page to canvas
-  useEffect(()=>{let cancelled=false;
+  /*useEffect(()=>{let cancelled=false;
     async function render(){setRenderError(""); const canvas=pdfCanvasRef.current; if(!canvas||!file) return;
       try{
         await ensurePdfJs(); const data=await file.arrayBuffer();
@@ -367,10 +369,10 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
       }catch(err){console.error(err); setRenderError("Failed to render PDF first page.");}
     }
     render(); return()=>{cancelled=true;};
-  },[file, pageIndex, renderScale]);
+  },[file, pageIndex, renderScale]);*/
 
   // Draw overlay (rects + draft)
-  useEffect(()=>{const overlay=overlayRef.current; if(!overlay) return; const ctx=overlay.getContext("2d");
+  /*useEffect(()=>{const overlay=overlayRef.current; if(!overlay) return; const ctx=overlay.getContext("2d");
     ctx.clearRect(0,0,overlay.width,overlay.height);
   const sx = (pageMeta?.width && overlay.width) ? (overlay.width / pageMeta.width) : 1;
   const sy = (pageMeta?.height && overlay.height) ? (overlay.height / pageMeta.height) : 1;
@@ -388,13 +390,13 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
     ctx.setLineDash([]);
 });
     if(draft){ctx.strokeStyle="rgba(0,200,255,0.9)"; ctx.lineWidth=2; ctx.setLineDash([4,3]); ctx.strokeRect(draft.x,draft.y,draft.w,draft.h); ctx.setLineDash([]);}
-  },[rects, draft, activeIndex, pageMeta]);
+  },[rects, draft, activeIndex, pageMeta]);*/
 
   // Drawing handlers (Pointer Events)
-  const startRef=useRef(null); const drawingRef=useRef(false);
-  const [confirmUI,setConfirmUI]=useState(null);
+  //const startRef=useRef(null); const drawingRef=useRef(false);
+  //const [confirmUI,setConfirmUI]=useState(null);
 
-  const onPointerDown=e=>{if(!overlayRef.current) return; e.preventDefault();
+  /*const onPointerDown=e=>{if(!overlayRef.current) return; e.preventDefault();
     overlayRef.current.setPointerCapture?.(e.pointerId);
     const r=overlayRef.current.getBoundingClientRect();
     const x=e.clientX-r.left, y=e.clientY-r.top; startRef.current={x,y}; drawingRef.current=true; setDraft({x,y,w:0,h:0});};
@@ -444,7 +446,7 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
     setRectActions(prev => ({ ...prev, [id]: { action: "redact" } }));
     setDraft(null); setConfirmUI(null);
   };
-  const cancelDraft=()=>{setDraft(null); setConfirmUI(null);};
+  const cancelDraft=()=>{setDraft(null); setConfirmUI(null);};*/
   const removeRect=id=>{
     setRects(prev=>prev.filter(r=>r.id!==id));
     setRectActions(prev=>{const n={...prev}; delete n[id]; return n;});
@@ -593,7 +595,7 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
 
         <div className="grid-2">
           {/* LEFT: PDF Viewer - 3/4 width */}
-          <section className="panel section">
+          {/*<section className="panel section">
             <div className="mb-3 flex items-center justify-between">
               <div className="text-sm text-neutral-300">
                 Preview: <span className="text-neutral-100 font-medium">{file ? file.name : "No file"}</span>
@@ -620,9 +622,9 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
                     {templateFileIdx === i ? "  • template" : ""}
                   </button>
               ))}
-            </div>
+            </div>*/}
             {/* Page navigation */}
-            <div className="mb-2 flex justify-center text-sm">
+            {/*<div className="mb-2 flex justify-center text-sm">
               <div className="flex items-center gap-3">
                 <button
                   type="button"
@@ -646,11 +648,11 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
                   Next →
                 </button>
               </div>
-            </div>
+            </div>*/}
 
             
             {/* Quick-jump chips (secondary mode only) */}
-            {isSecondaryMode && lastLowConf && lastLowConf.length > 0 && (() => {
+            {/*{isSecondaryMode && lastLowConf && lastLowConf.length > 0 && (() => {
               const currentBase = (file?.name || "").replace(/_sanitized\.pdf$/i, ".pdf");
               const entry = lastLowConf.find(it => (it.pdf || "").endsWith(currentBase));
               const pages = entry
@@ -677,11 +679,11 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
                   ))}
                 </div>
               ) : null;
-            })()}
+            })()}*/}
   
             
             {/* Remove current PDF from batch */}
-            {isSecondaryMode && (
+            {/*{isSecondaryMode && (
               <div className="mb-2">
                 <button
                   type="button"
@@ -701,10 +703,10 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
                   <IconTrash2 /> Remove this PDF
                 </button>
               </div>
-            )}
+            )}*/}
 
             {/* Wrapper MUST be positioning context for overlay; also force position via style to avoid CSS framework issues */}
-            <div ref={wrapRef} className="relative w-full overflow-auto" style={{ position: "relative" }}>
+            {/*<div ref={wrapRef} className="relative w-full overflow-auto" style={{ position: "relative" }}>
               <canvas ref={pdfCanvasRef} className="block " />
               <canvas
                 ref={overlayRef}
@@ -727,7 +729,50 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
 
             {renderError && <div className="mt-3 text-sm text-rose-400">{renderError}</div>}
             <p className="mt-3 text-xs text-neutral-500">Tip: click–drag on the preview to draw a rectangle. Release to confirm.</p>
-          </section>
+          </section>*/}
+
+          {/* LEFT: PDF Viewer - 3/4 width. Updated on 22th Jan 2026 */} <section className="panel section">
+            <PDFViewer
+                files={currentFiles}
+                activeFileIndex={activeIndex}
+                onFileChange={setActiveIndex}
+                pageIndex={pageIndex}
+                onPageChange={setPageIndex}
+                existingRects={rects}
+                onRectsChange={(newRects) => {
+                setRects(newRects);
+                // Auto-set template file on first rectangle
+                if (newRects.length > 0 && templateFileIdx === null) {
+                    setTemplateFileIdx(activeIndex);
+                }
+                }}
+                drawingEnabled={step === 1}
+                templateFileIdx={templateFileIdx}
+                lowConfidencePages={lowPagesForActive}
+            />
+
+            {/* Keep the "Remove this PDF" button for secondary mode */}
+            {isSecondaryMode && (
+                <div className="mt-3">
+                <button
+                    type="button"
+                    onClick={() => {
+                    const copy = [...secondaryFiles];
+                    copy.splice(activeIndex, 1);
+                    if (copy.length === 0) {
+                        setIsSecondaryMode(false);
+                        setSecondaryFiles([]);
+                    } else {
+                        setSecondaryFiles(copy);
+                        setActiveIndex(i => Math.min(i, copy.length - 1));
+                    }
+                    }}
+                    className="inline-flex items-center gap-1 rounded-md border border-rose-700/70 px-2 py-1 text-xs hover:bg-rose-900/30"
+                >
+                    <IconTrash2 /> Remove this PDF
+                </button>
+                </div>
+            )}</section>
 
           {/* RIGHT: Tools - 1/4 width */}
          <section className="panel section">

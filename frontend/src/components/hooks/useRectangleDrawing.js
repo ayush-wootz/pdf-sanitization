@@ -108,7 +108,7 @@ export function useRectangleDrawing(pageMeta, activeFileIndex) {
             orientation: pageMeta.orientation ?? "H",
         };
 
-        setReacts((prev) => [...prev, newRect]);
+        setRects((prev) => [...prev, newRect]);
         setDraft(null);
         setConfirmUI(null);
     }, [draft, pageMeta, activeFileIndex]);
