@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import ConfirmCancelUI from "../rectangles/ConfirmCancelUI";
-import { denormalizeCoordinates } from "../utils/pdfUtils";
+import { denormalizeCoordinates } from "../../utils/pdfUtils";
 
 /**
  * DrawingOverlay Component

@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
-import { IconUploadCloud, IconCheck } from "../assets/icons";
+import { IconUploadCloud, IconCheck } from "../../assets/icons";
 import FileList from "../common/FileList";
-import "../styles/landing.css";
+import "../../styles/landing.css";
 
 /**
  * LandingPage Component

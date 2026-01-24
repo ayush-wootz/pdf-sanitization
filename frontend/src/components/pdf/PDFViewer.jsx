@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
-import { usePDFRenderer } from "../hooks/usePDFRenderer";
-import { useRectangleDrawing } from "../hooks/useRectangleDrawing";
+import { usePDFRenderer } from "../../hooks/usePDFRenderer";
+import { useRectangleDrawing } from "../../hooks/useRectangleDrawing";
 import PageNavigation from "./PageNavigation";
 import FileTabBar from "./FileTabBar";
 import DrawingOverlay from "./DrawingOverlay";
-import "../styles/pdf.css";
+import "../../styles/pdf.css";
 
 /**
  * PDFViewer Component

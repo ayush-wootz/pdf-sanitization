@@ -1,5 +1,5 @@
 import React from "react";
-import { IconTrash2 } from "../assets/icons";
+import { IconTrash2 } from "../../assets/icons";
 import RectangleActions from "./RectangleActions";
 import LogoUpload from "./LogoUpload";
 

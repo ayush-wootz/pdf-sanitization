@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconX } from '../assets/icons';
+import { IconX } from '../../assets/icons';
 
 /**
  * FileList Component

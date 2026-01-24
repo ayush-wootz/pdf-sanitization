@@ -1,6 +1,6 @@
 import React from "react";
 import RectangleItem from "./RectangleItem";
-import "../styles/rectangles.css";
+import "../../styles/rectangles.css";
 
 /**
  * RectanglesList Component

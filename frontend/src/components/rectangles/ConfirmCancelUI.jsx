@@ -1,5 +1,5 @@
 import React from "react";
-import { IconCheck, IconX } from "../assets/icons";
+import { IconCheck, IconX } from "../../assets/icons";
 
 /**
  * ConfirmCancelUI Component

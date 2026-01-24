@@ -3,6 +3,12 @@ import "./home.css";
 import PDFViewer from "./components/pdf/PDFViewer";
 import RectanglesList from "./components/rectangles/RectanglesList";
 import LLMTermsSection from "./components/terms/LLMTermsSection";
+import ThresholdControl from "./components/shared/ThresholdControl";
+import ProcessingIndicator from "./components/shared/ProcessingIndicator";
+import RunButton from "./components/shared/RunButton";
+import ResultsSection from "./components/shared/ResultsSection";
+import Stepper from "./components/shared/Stepper";
+import "./styles/stepper.css";
 
 // Backend base URL (set Vercel env: VITE_API_BASE=https://<your-render>.onrender.com)
  const API_BASE = "http://localhost:8000"
@@ -480,17 +486,15 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
           {/* RIGHT: Tools - 1/4 width */}
          <section className="panel section">
             {/* Stepper */}
-            <div className="flex items-center gap-2 text-xs">
-              <button type="button" onClick={()=>setStep(1)} className={`px-2 py-1 rounded ${step===1?"bg-neutral-700":"bg-neutral-800 hover:bg-neutral-700"}`}>1. Rectangles</button>
-              <span className="text-neutral-500">→</span>
-              <button type="button" onClick={()=>setStep(2)} className={`px-2 py-1 rounded ${step===2?"bg-neutral-700":"bg-neutral-800 hover:bg-neutral-700"}`}>2. Text & Run</button>
-              {(lastZipUrl || (lastLowConf && lastLowConf.length > 0)) && (
-                <>
-                  <span className="text-neutral-500">→</span>
-                  <button type="button" onClick={()=>setStep(3)} className={`px-2 py-1 rounded ${step===3?"bg-neutral-700":"bg-neutral-800 hover:bg-neutral-700"}`}>3. Results</button>
-                </>
-              )}
-            </div>
+            <Stepper
+            steps={[
+                { id: 1, label: "Rectangles", enabled: true },
+                { id: 2, label: "Text & Run", enabled: true },
+                { id: 3, label: "Results", enabled: lastZipUrl || (lastLowConf && lastLowConf.length > 0) }
+            ].filter(s => s.enabled !== false)}
+            currentStep={step}
+            onStepClick={setStep}
+            />
             
             {step === 1 ? (
                 <div>
@@ -531,7 +535,6 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
                 </div>
             ) : step === 2 ? (
                 <div>
-                    {/* LLM Terms Section */}
                     <LLMTermsSection
                     terms={llmTerms}
                     context={llmContext}
@@ -547,80 +550,44 @@ function NewClientSetupPage({ pdfFiles, clientName, onBack, initialSecondary  })
 
                     {/* Threshold + Run Button */}
                     <div className="mt-4 flex items-center justify-between gap-3">
-                    <div className="text-xs text-neutral-300">
-                        Threshold:&nbsp;
-                        <input type="number" step="0.01" min="0" max="1" value={threshold}
-                            onChange={e=>setThreshold(parseFloat(e.target.value)||0)}
-                            className="rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-1 text-xs"/>
-                    </div>
+                    <ThresholdControl
+                        value={threshold}
+                        onChange={setThreshold}
+                        disabled={isProcessing}
+                    />
+                    
                     <div className="flex gap-2">
-                        <button type="button" onClick={()=>setStep(1)} className="btn">← Back</button>
-                        <button
-                        type="button"
-                        onClick={runSanitization}
-                        disabled={!canProceed || isProcessing}
-                        className={`btn btn-primary ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                        {isProcessing ? (
-                            <>
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2"></div>
-                            Processing...
-                            </>
-                        ) : (
-                            <>
-                            <IconCheck /> Run Sanitization
-                            </>
-                        )}
+                        <button type="button" onClick={()=>setStep(1)} className="btn">
+                        ← Back
                         </button>
+                        <RunButton
+                        onClick={runSanitization}
+                        disabled={!canProceed}
+                        isProcessing={isProcessing}
+                        />
                     </div>
                     </div>
+
+                    <ProcessingIndicator
+                    isProcessing={isProcessing}
+                    progress={processingProgress}
+                    />
                 </div>
             ) : (
                 <div>
-                  {/* Step 3: Results */}
-                  {(lastZipUrl || (lastLowConf && lastLowConf.length > 0)) ? (
-                    <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-3 text-sm">
-                      {lastZipUrl && (
-                        <button
-                          type="button"
-                          className="inline-flex items-center rounded-lg border border-neutral-700 px-3 py-1.5 hover:bg-neutral-800 mr-2"
-                          onClick={async () => { await downloadFile(lastZipUrl, `${clientName}_sanitized_pdfs.zip`); }}
-                        >
-                          Download ZIP
-                        </button>
-                      )}
-                      {lastLowConf && lastLowConf.length > 0 && (
-                        <button
-                          type="button"
-                          className="inline-flex items-center rounded-lg border border-neutral-700 px-3 py-1.5 hover:bg-neutral-800"
-                          onClick={() => autoLoadSecondaryFromLowConf(lastLowConf, clientName)}
-                        >
-                          Proceed with secondary process batch
-                        </button>
-                      )}
-                      {lastLowConf && lastLowConf.length > 0 && (
-                        <div className="mt-3 text-xs text-neutral-400">
-                          <div className="font-medium text-neutral-300 mb-1">Low-confidence summary</div>
-                          <ul className="list-disc pl-5 space-y-1">
-                            {lastLowConf.map((it, idx) => {
-                              const base = (it.pdf || "").split(/[\\/]/).pop() || it.pdf;
-                              const pages = Object.keys(it.low_rects || {}).map(n => Number(n) + 1);
-                              return (
-                                <li key={idx}>
-                                  <span className="text-neutral-200">{base}</span>
-                                  {pages.length ? ` — pages: ${pages.join(", ")}` : ""}
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-xs text-neutral-400">No results to display yet.</div>
-                  )}
+                    <ResultsSection
+                    zipUrl={lastZipUrl}
+                    lowConfidence={lastLowConf}
+                    clientName={clientName}
+                    onDownload={async () => {
+                        await downloadFile(lastZipUrl, `${clientName}_sanitized_pdfs.zip`);
+                    }}
+                    onSecondaryProcess={() => {
+                        autoLoadSecondaryFromLowConf(lastLowConf, clientName);
+                    }}
+                    />
                 </div>
-              )}
+                )}
           </section>
         </div>
       </div>
@@ -834,244 +801,80 @@ function ExistingClientPage({ pdfFiles, clientName, onBack, onTreatAsNew, onProc
              </div>
            ) : (
              <>
-               {/* Two-tab stepper */}
-               <div className="flex items-center gap-2 text-xs">
-                 <button
-                   type="button"
-                   onClick={() => setStep(2)}
-                   className={`px-2 py-1 rounded ${step === 2 ? "bg-neutral-700" : "bg-neutral-800 hover:bg-neutral-700"}`}
-                 >
-                   1. Text &amp; Run
-                 </button>
-                 {(lastZipUrl || (lastLowConf && lastLowConf.length > 0)) && (
-                   <>
-                     <span className="text-neutral-500">→</span>
-                     <button
-                       type="button"
-                       onClick={() => setStep(3)}
-                       className={`px-2 py-1 rounded ${step === 3 ? "bg-neutral-700" : "bg-neutral-800 hover:bg-neutral-700"}`}
-                     >
-                       2. Results
-                     </button>
-                   </>
-                 )}
-               </div>
+               {/* Stepper */}
+                <Stepper
+                steps={[
+                    { id: 2, label: "Text & Run", enabled: true },
+                    { id: 3, label: "Results", enabled: lastZipUrl || (lastLowConf && lastLowConf.length > 0) }
+                ].filter(s => s.enabled !== false)}
+                currentStep={step}
+                onStepClick={setStep}
+                />
    
                {/* ---- TAB: Text & Run (LLM-only) ---- */}
                {step === 2 && (
-                 <>
-                   {/* LLM Term Generation */}
-                   <div className="mt-2 rounded-xl border border-neutral-800 bg-neutral-900/40 p-4">
-                     <div className="flex items-center justify-between mb-3">
-                       <h2 className="text-sm font-semibold text-neutral-200">Generate sensitive terms using LLM</h2>
-                       <button
-                         type="button"
-                         onClick={generateSensitiveTerms}
-                         disabled={isGeneratingTerms || !pdfFiles.length}
-                         className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-xs text-white hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                       >
-                         {isGeneratingTerms ? (
-                           <>
-                             <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                             Generating...
-                           </>
-                         ) : (
-                           <>
-                             <IconPlus className="h-3 w-3" />
-                             Generate Terms
-                           </>
-                         )}
-                       </button>
-                     </div>
-   
-                     <div className="mb-3">
-                       <label className="text-xs text-neutral-300 mb-1 block">Custom context (optional)</label>
-                       <textarea
-                         value={llmContext}
-                         onChange={(e) => setLlmContext(e.target.value)}
-                         rows={2}
-                         placeholder="Provide additional context for the LLM to better identify sensitive terms..."
-                         className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-1 text-xs placeholder:text-neutral-500"
-                       />
-                     </div>
-   
-                     <div className="space-y-2">
-                       <div className="flex items-center justify-between">
-                         <h3 className="text-xs font-medium text-neutral-300">Terms ({llmTerms.length})</h3>
-                       </div>
-   
-                       <div className="max-h-60 overflow-y-auto space-y-2">
-                         {llmTerms.length === 0 ? (
-                           <div className="text-xs text-neutral-400">
-                             No terms yet. Add terms manually or generate via LLM.
-                           </div>
-                         ) : (
-                           llmTerms.map((item, index) => (
-                             <div
-                               key={index}
-                               className="flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 p-2"
-                             >
-                               <div className="flex-1 grid grid-cols-2 gap-2">
-                                 <div>
-                                   <label className="text-xs text-neutral-400 block mb-1">Term</label>
-                                   <input
-                                     type="text"
-                                     value={item.term}
-                                     onChange={(e) => updateLlmTermText(index, e.target.value)}
-                                     placeholder="Sensitive term"
-                                     className="w-full rounded border border-neutral-600 bg-neutral-700 px-2 py-1 text-xs text-neutral-200 placeholder:text-neutral-500"
-                                   />
-                                 </div>
-                                 <div>
-                                   <label className="text-xs text-neutral-400 block mb-1">Replace with</label>
-                                   <input
-                                     type="text"
-                                     value={item.replacement}
-                                     onChange={(e) => updateLlmTermReplacement(index, e.target.value)}
-                                     placeholder="Leave blank to redact"
-                                     className="w-full rounded border border-neutral-600 bg-neutral-700 px-2 py-1 text-xs text-neutral-200 placeholder:text-neutral-500"
-                                   />
-                                 </div>
-                               </div>
-                               <button
-                                 type="button"
-                                 onClick={() => removeLlmTerm(index)}
-                                 className="inline-flex items-center justify-center rounded border border-red-600 bg-red-600 p-1 text-white hover:bg-red-500"
-                                 title="Remove term"
-                               >
-                                 <IconX className="h-3 w-3" />
-                               </button>
-                             </div>
-                           ))
-                         )}
-                       </div>
-                       <div className="flex justify-end">
-                          <button
-                            type="button"
-                            onClick={addNewLlmTerm}
-                            className="inline-flex items-center gap-1 rounded border border-neutral-600 bg-neutral-700 px-2 py-1 text-xs text-neutral-300 hover:bg-neutral-600"
-                          >
-                            <IconPlus className="h-3 w-3" />
-                            Add Term
-                          </button>
-                        </div>
-                     </div>
-                   </div>
-   
-                   {/* Threshold + Run + Progress */}
-                   <div className="flex items-center justify-between gap-3 mt-3">
-                     <div className="text-xs text-neutral-300">
-                       Threshold:&nbsp;
-                       <input
-                         type="number"
-                         step="0.01"
-                         min="0"
-                         max="1"
-                         value={threshold}
-                         onChange={(e) => setThreshold(parseFloat(e.target.value) || 0)}
-                         className="rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-1 text-xs"
-                       />
-                     </div>
-   
-                     <button
-                       type="button"
-                       onClick={runSanitizationExisting}
-                       disabled={!canProceed || isProcessing}
-                       className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm transition border border-emerald-700 bg-emerald-600 text-white hover:bg-emerald-500 ${
-                         (!canProceed || isProcessing) ? "opacity-50 cursor-not-allowed" : ""
-                       }`}
-                     >
-                       {isProcessing ? (
-                         <>
-                           <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                           Processing...
-                         </>
-                       ) : (
-                         <>
-                           <IconCheck /> Run Sanitization
-                         </>
-                       )}
-                     </button>
-                   </div>
-   
-                   {isProcessing && (
-                     <div className="mt-4">
-                       <div className="flex items-center justify-between text-xs text-neutral-400 mb-1">
-                         <span>Processing PDFs...</span>
-                         <span>{processingProgress}%</span>
-                       </div>
-                       <div className="w-full bg-neutral-700 rounded-full h-2">
-                         <div
-                           className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
-                           style={{ width: `${processingProgress}%` }}
-                         />
-                       </div>
-                     </div>
-                   )}
-                 </>
-               )}
+                <>
+                    {/* LLM Terms Section */}
+                    <LLMTermsSection
+                    terms={llmTerms}
+                    context={llmContext}
+                    isGenerating={isGeneratingTerms}
+                    hasFiles={pdfFiles.length > 0}
+                    onContextChange={setLlmContext}
+                    onGenerate={generateSensitiveTerms}
+                    onTermChange={updateLlmTermText}
+                    onReplacementChange={updateLlmTermReplacement}
+                    onRemoveTerm={removeLlmTerm}
+                    onAddTerm={addNewLlmTerm}
+                    />
+
+                    {/* Threshold + Run Button */}
+                    <div className="flex items-center justify-between gap-3 mt-3">
+                    <ThresholdControl
+                        value={threshold}
+                        onChange={setThreshold}
+                        disabled={isProcessing}
+                    />
+
+                    <RunButton
+                        onClick={runSanitizationExisting}
+                        disabled={!canProceed}
+                        isProcessing={isProcessing}
+                    />
+                    </div>
+
+                    <ProcessingIndicator
+                    isProcessing={isProcessing}
+                    progress={processingProgress}
+                    />
+                </>
+                )}
    
                {/* ---- TAB: Results ---- */}
                {step === 3 && (
-                 <div className="mt-3">
-                   {(lastZipUrl || (lastLowConf && lastLowConf.length > 0)) ? (
-                     <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-3 text-sm">
-                       {lastZipUrl && (
-                         <button
-                           type="button"
-                           className="inline-flex items-center rounded-lg border border-neutral-700 px-3 py-1.5 hover:bg-neutral-800 mr-2"
-                           onClick={async () => {
-                             try {
-                               await downloadFile(lastZipUrl, `${clientName}_sanitized_pdfs.zip`);
-                             } catch (e) {
-                               alert("Could not download the ZIP. See console for details.");
-                               console.error(e);
-                             }
-                           }}
-                         >
-                           Download ZIP
-                         </button>
-                       )}
-   
-                       {(lastLowConf && lastLowConf.length > 0) && (
-                         <button
-                           type="button"
-                           className="inline-flex items-center rounded-lg border border-neutral-700 px-3 py-1.5 hover:bg-neutral-800"
-                           onClick={() => {
-                             if (goToSecondary) {
-                               goToSecondary(lastLowConf, clientName);
-                             } else {
-                               alert("Secondary hand-off not wired in App()");
-                             }
-                           }}
-                         >
-                           Proceed with secondary process batch
-                         </button>
-                       )}
-   
-                       {(lastLowConf && lastLowConf.length > 0) && (
-                         <div className="mt-3 text-xs text-neutral-400">
-                           <div className="font-medium text-neutral-300 mb-1">Low-confidence summary</div>
-                           <ul className="list-disc pl-5 space-y-1">
-                             {lastLowConf.map((it, idx) => {
-                               const base = (it.pdf || "").split(/[\\/]/).pop() || it.pdf;
-                               const pages = Object.keys(it.low_rects || {}).map((n) => Number(n) + 1);
-                               return (
-                                 <li key={idx}>
-                                   <span className="text-neutral-200">{base}</span>
-                                   {pages.length ? ` — pages: ${pages.join(", ")}` : ""}
-                                 </li>
-                               );
-                             })}
-                           </ul>
-                         </div>
-                       )}
-                     </div>
-                   ) : (
-                     <div className="text-xs text-neutral-400">No results to display yet.</div>
-                   )}
-                 </div>
-               )}
+                <div className="mt-3">
+                    <ResultsSection
+                    zipUrl={lastZipUrl}
+                    lowConfidence={lastLowConf}
+                    clientName={clientName}
+                    onDownload={async () => {
+                        try {
+                        await downloadFile(lastZipUrl, `${clientName}_sanitized_pdfs.zip`);
+                        } catch (e) {
+                        alert("Could not download the ZIP. See console for details.");
+                        console.error(e);
+                        }
+                    }}
+                    onSecondaryProcess={() => {
+                        if (goToSecondary) {
+                        goToSecondary(lastLowConf, clientName);
+                        } else {
+                        alert("Secondary hand-off not wired in App()");
+                        }
+                    }}
+                    />
+                </div>
+                )}
              </>
            )}
          </section>

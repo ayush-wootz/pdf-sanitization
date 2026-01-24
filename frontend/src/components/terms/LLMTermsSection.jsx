@@ -1,8 +1,8 @@
 import React from "react";
-import { IconPlus } from "../assets/icons";
+import { IconPlus } from "../../assets/icons";
 import ContextInput from "./ContextInput";
 import TermsTable from "./TermsTable";
-import "../styles/terms.css";
+import "../../styles/terms.css";
 
 /**
  * LLMTermsSection Component
