@@ -763,12 +763,12 @@ async def upload_logo(file: UploadFile = File(...)):
     filename = file.filename
     data = file.file.read()
 
-    if _sb:
-        key = f"{_SB_LOGOS_PREFIX}/{filename}"
-        _sb.storage.from_(_SB_BUCKET).upload(
-            key, data, {"contentType": file.content_type or "image/png", "upsert": "true"}
-        )
-        return {"key": key}
+    # if _sb:
+    #     key = f"{_SB_LOGOS_PREFIX}/{filename}"
+    #     _sb.storage.from_(_SB_BUCKET).upload(
+    #         key, data, {"contentType": file.content_type or "image/png", "upsert": "true"}
+    #     )
+    #     return {"key": key}
 
     # Local fallback
     local_dir = os.path.join("assets", "logos")
@@ -777,4 +777,4 @@ async def upload_logo(file: UploadFile = File(...)):
     local_path = os.path.join(local_dir, unique_name)
     with open(local_path, "wb") as f:
         f.write(data)
-    return {"key": f"logos/{unique_name}"}
+    return {"key": f"assets/logos/{unique_name}"} # fixed local path

@@ -11,8 +11,8 @@ import Stepper from "./components/shared/Stepper";
 import "./styles/stepper.css";
 
 // Backend base URL (set Vercel env: VITE_API_BASE=https://<your-render>.onrender.com)
-// const API_BASE = "http://localhost:8000"
-const API_BASE = String(process.env.REACT_APP_API_BASE || "").replace(/\/+$/, "");
+const API_BASE = "http://localhost:8000"
+// const API_BASE = String(process.env.REACT_APP_API_BASE || "").replace(/\/+$/, "");
 
 
 /* ================== Inline Icon Components ================== */
