@@ -729,7 +729,7 @@ async def download_file(filename: str):
 
 
 
-@app.get("/api/clients")
+'''@app.get("/api/clients")
 async def list_clients():
     # Supabase-first listing of templates/<client>/, fallback to local disk
     if _sb:
@@ -756,7 +756,7 @@ async def list_clients():
     root = Path(tm.store_dir)
     root.mkdir(parents=True, exist_ok=True)
     clients = sorted([p.name for p in root.iterdir() if p.is_dir()])
-    return {"clients": clients}
+    return {"clients": clients}'''
 
 
 @app.post("/api/upload-logo")
