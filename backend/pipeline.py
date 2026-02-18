@@ -87,6 +87,7 @@ def process_batch(
     image_map: dict[int, str] | None = None,
     input_root: str | None = None,
     secondary: bool = False,
+    device_id: str | None = None,
 ) -> list[dict]:
     """
     For each PDF:
@@ -106,7 +107,7 @@ def process_batch(
        If `input_root` is provided, preserve folder hierarchy under `output_dir`.
     """
     # ── Load the saved template profile ──
-    tm = TemplateManager()
+    tm = TemplateManager(device_id=device_id)
     profile      = tm.load_profile(template_id)
     rectangles   = profile["rectangles"]   # [{'page': i, 'bbox': (...)} …]
     ref_contents = profile["contents"]     # [{'text': "...", 'image_hash': "..."} …]
@@ -438,6 +439,7 @@ def process_low_conf_batch(
     threshold: float = 0.9,
     image_map: dict[int, str] | None = None,   # ignored by design (step 6 skipped)
     input_root: str | None = None,
+    device_id: str | None = None
 ) -> list[dict]:
     """
     Secondary pass for low-confidence PDFs.
@@ -463,7 +465,7 @@ def process_low_conf_batch(
         return []
 
     # ── Resolve the correct template version to load ──
-    tm = TemplateManager()
+    tm = TemplateManager(device_id=device_id)
     client, provided_ver = tm.parse_template_id(new_template_id)
 
     # Try to load exactly what the user selected (preferred).
