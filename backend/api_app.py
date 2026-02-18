@@ -1,7 +1,7 @@
 # api_app.py
 import os, shutil, tempfile, zipfile, json, uuid
 from pathlib import Path
-from fastapi import FastAPI, UploadFile, Form, File, Request, BackgroundTasks
+from fastapi import FastAPI, UploadFile, Form, File, Request, BackgroundTasks, Query
 import fitz 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
@@ -299,6 +299,7 @@ async def sanitize(
                     image_map=img_map,
                     input_root=None,
                     secondary=secondary,
+                    device_id=device_id
                 )
             low_conf = await loop.run_in_executor(EXECUTOR, _run_batch)
 
@@ -503,6 +504,7 @@ async def sanitize_existing(
                 image_map=image_map,
                 input_root=None,
                 secondary=secondary,
+                device_id=device_id
             )
         low_conf = await loop.run_in_executor(EXECUTOR, _run2)
 
@@ -728,35 +730,51 @@ async def download_file(filename: str):
     return FileResponse(file_path, filename=filename, media_type=media)
 
 
+TEMPLATE_STORE = "templates"
 
-'''@app.get("/api/clients")
-async def list_clients():
-    # Supabase-first listing of templates/<client>/, fallback to local disk
-    if _sb:
-        try:
-            top = _sb.storage.from_(_SB_BUCKET).list(path=_SB_TPL_PREFIX) or []
-            candidates = [it.get("name", "") for it in top if it.get("name")]
-            clients = []
-            for name in candidates:
-                if "." in name:
-                    continue  # skip files at templates/ root
-                sub = _sb.storage.from_(_SB_BUCKET).list(path=f"{_SB_TPL_PREFIX}/{name}") or []
-                has_template = any(
-                    ent.get("name", "").startswith(f"{name}_v") and ent.get("name", "").endswith(".json")
-                    for ent in sub
-                )
-                if has_template:
-                    clients.append(name)
-            clients.sort()
-            return {"clients": clients}
-        except Exception:
-            pass  # fall back to local
+@app.get("/api/clients")
+async def list_clients(device_id: str = Query(...)):
+    device_path = os.path.join(TEMPLATE_STORE, device_id)
 
-    tm = TemplateManager()
-    root = Path(tm.store_dir)
-    root.mkdir(parents=True, exist_ok=True)
-    clients = sorted([p.name for p in root.iterdir() if p.is_dir()])
-    return {"clients": clients}'''
+    if not os.path.exists(device_path):
+        return {"clients": []}
+
+    clients = [
+        name for name in os.listdir(device_path)
+        if os.path.isdir(os.path.join(device_path, name))
+    ]
+
+    return {"clients": clients}
+
+
+#@app.get("/api/clients")
+#async def list_clients():
+#    # Supabase-first listing of templates/<client>/, fallback to local disk
+#    if _sb:
+#        try:
+#            top = _sb.storage.from_(_SB_BUCKET).list(path=_SB_TPL_PREFIX) or []
+#            candidates = [it.get("name", "") for it in top if it.get("name")]
+#            clients = []
+#            for name in candidates:
+#                if "." in name:
+#                    continue  # skip files at templates/ root
+#                sub = _sb.storage.from_(_SB_BUCKET).list(path=f"{_SB_TPL_PREFIX}/{name}") or []
+#                has_template = any(
+#                    ent.get("name", "").startswith(f"{name}_v") and ent.get("name", "").endswith(".json")
+#                    for ent in sub
+#                )
+#                if has_template:
+#                    clients.append(name)
+#            clients.sort()
+#            return {"clients": clients}
+#        except Exception:
+#            pass  # fall back to local
+#
+#    tm = TemplateManager()
+#    root = Path(tm.store_dir)
+#    root.mkdir(parents=True, exist_ok=True)
+#    clients = sorted([p.name for p in root.iterdir() if p.is_dir()])
+#    return {"clients": clients}
 
 
 @app.post("/api/upload-logo")
