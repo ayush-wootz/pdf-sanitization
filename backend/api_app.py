@@ -111,11 +111,14 @@ def zip_append_with_versions(zip_path: str, file_paths: list[str]) -> str:
     return zip_path
 
 # helpers for passlog to show only low conf pages filtering out processed pages
-def _passlog_path_for(client: str) -> str:
-    return os.path.join(STATIC_DIR, f"{client}_passlog.json")
+def _passlog_path_for(device_id: str, client: str) -> str:
+    safe_device = "".join(ch for ch in device_id if ch.isalnum() or ch in "_-")
+    device_dir = os.path.join(STATIC_DIR, safe_device)
+    os.makedirs(device_dir, exist_ok=True)
+    return os.path.join(device_dir, f"{client}_passlog.json")
 
-def _load_passlog(client: str) -> dict:
-    path = _passlog_path_for(client)
+def _load_passlog(device_id: str, client: str) -> dict:
+    path = _passlog_path_for(device_id, client)
     if not os.path.exists(path):
         return {}
     try:
@@ -132,8 +135,8 @@ def _load_passlog(client: str) -> dict:
     except Exception:
         return {}
 
-def _save_passlog(client: str, data: dict) -> None:
-    path = _passlog_path_for(client)
+def _save_passlog(device_id: str, client: str, data: dict) -> None:
+    path = _passlog_path_for(device_id, client)
     for _ in range(3):
         try:
             with open(path, "w", encoding="utf-8") as f:
@@ -213,6 +216,7 @@ async def sanitize(
     image_map: str = Form("{}"),  # JSON: {tidx: "logos/<filename>"}
     threshold: float = Form(default=0.9),
     client_name: str = Form(...),
+    device_id: str = Form(...),
     secondary: bool = Form(default=False),
 ):
     # --- per-job workspace and uploads ---
@@ -270,7 +274,7 @@ async def sanitize(
         # then fall through to the common ZIP/response code below
     else:
         # 3) versioned template id
-        tm = TemplateManager()
+        tm = TemplateManager(device_id=device_id)
         template_id = tm.next_version_id(client)
     
         # 4) save profile (multi-pdf)
@@ -300,7 +304,7 @@ async def sanitize(
 
 
     # -- Passlog: filter out pages that have passed before & update the passlog with new passes
-    passlog = _load_passlog(client)
+    passlog = _load_passlog(device_id ,client)
     # Build a quick map of failing pages returned by pipeline, keyed by normalized base name
     failing_by_base = {}
     for item in (low_conf or []):
@@ -352,7 +356,7 @@ async def sanitize(
 
     # overwrite low_conf with the filtered view and persist the passlog
     low_conf = filtered_low_conf
-    _save_passlog(client, passlog)
+    _save_passlog(device_id, client, passlog)
 
     # 6) — Clean up old ZIPs first
     delete_old_zips(STATIC_DIR, hours=1)
@@ -446,9 +450,10 @@ async def sanitize_existing(
     text_replacements: str = Form(default="{}"),
     threshold: float = Form(default=0.9),
     client_name: str = Form(...),
+    device_id: str = Form(...),
     secondary: bool = Form(default=False),
 ):
-    tm = TemplateManager()
+    tm = TemplateManager(device_id=device_id)
     client = _safe_client_id(client_name)
     template_id = tm.latest_version_id(client)
 
@@ -502,7 +507,7 @@ async def sanitize_existing(
         low_conf = await loop.run_in_executor(EXECUTOR, _run2)
 
     # -- Passlog: filter out pages that have passed before & update the passlog with new passes
-    passlog = _load_passlog(client)
+    passlog = _load_passlog(device_id, client)
     # Build a quick map of failing pages returned by pipeline, keyed by normalized base name
     failing_by_base = {}
     for item in (low_conf or []):
@@ -554,7 +559,7 @@ async def sanitize_existing(
 
     # overwrite low_conf with the filtered view and persist the passlog
     low_conf = filtered_low_conf
-    _save_passlog(client, passlog)
+    _save_passlog(device_id, client, passlog)
 
 
     # 6) — Clean up old ZIPs first
@@ -764,11 +769,11 @@ async def upload_logo(file: UploadFile = File(...)):
     data = file.file.read()
 
     # if _sb:
-    #    key = f"{_SB_LOGOS_PREFIX}/{filename}"
-    #    _sb.storage.from_(_SB_BUCKET).upload(
-    #        key, data, {"contentType": file.content_type or "image/png", "upsert": "true"}
-    #   )
-    #    return {"key": key}
+    #     key = f"{_SB_LOGOS_PREFIX}/{filename}"
+    #     _sb.storage.from_(_SB_BUCKET).upload(
+    #         key, data, {"contentType": file.content_type or "image/png", "upsert": "true"}
+    #     )
+    #     return {"key": key}
 
     # Local fallback
     local_dir = os.path.join("assets", "logos")
@@ -777,4 +782,4 @@ async def upload_logo(file: UploadFile = File(...)):
     local_path = os.path.join(local_dir, unique_name)
     with open(local_path, "wb") as f:
         f.write(data)
-    return {"key": f"assets/logos/{unique_name}"}
+    return {"key": f"assets/logos/{unique_name}"} # fixed local path
