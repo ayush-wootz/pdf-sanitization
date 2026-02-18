@@ -159,7 +159,7 @@ class TemplateManager:
         
         cdir = self._client_dir(client)
         if for_write:
-            os.makedirs(cdir, f"{template_id}.json")
+            os.makedirs(cdir, exist_ok=True)
 
         return os.path.join(cdir, f"{template_id}.json")
 
