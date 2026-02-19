@@ -175,36 +175,41 @@ class TemplateManager:
      # ---------- list versions ----------
     def list_versions(self, client: str) -> List[int]:
         """
-        Prefer listing from Supabase; fall back to local disk.
+        Prefer listing from Supabase (device-aware); fall back to local disk.
         """
         if self.sb:
             try:
-                remote_dir = f"{self.prefix}/{client}"
+                remote_dir = f"{self.prefix}/{self.device_id}/{client}"
                 items = self.sb.storage.from_(self.bucket).list(path=remote_dir) or []
                 out = []
+
                 for it in items:
                     nm = (it.get("name") or "").strip()
                     if nm.endswith(".json") and nm.startswith(f"{client}_v"):
                         m = self._ID_RE.match(nm[:-5])
                         if m:
                             out.append(int(m.group("ver")))
+
                 out.sort()
                 return out
             except Exception:
                 pass  # fall back to local
 
+        # Local fallback
         cdir = self._client_dir(client)
         if not os.path.isdir(cdir):
             return []
-        
+
         out = []
         for fn in os.listdir(cdir):
             if fn.endswith(".json") and fn.startswith(f"{client}_v"):
                 m = self._ID_RE.match(fn[:-5])
                 if m:
                     out.append(int(m.group("ver")))
+
         out.sort()
         return out
+
 
     def latest_version_number(self, client: str) -> int:
         vers = self.list_versions(client)
