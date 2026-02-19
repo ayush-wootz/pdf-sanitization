@@ -170,28 +170,28 @@ class TemplateManager:
         if ver is None:
             # legacy flat id
             return f"{self.prefix}/{template_id}.json"
-        return f"{self.prefix}/{client}/{template_id}.json"
+        return f"{self.prefix}/{self.device_id}/{client}/{template_id}.json"
 
      # ---------- list versions ----------
     def list_versions(self, client: str) -> List[int]:
         """
         Prefer listing from Supabase; fall back to local disk.
         """
-        # if self.sb:
-        #     try:
-        #         remote_dir = f"{self.prefix}/{client}"
-        #         items = self.sb.storage.from_(self.bucket).list(path=remote_dir) or []
-        #         out = []
-        #         for it in items:
-        #             nm = (it.get("name") or "").strip()
-        #             if nm.endswith(".json") and nm.startswith(f"{client}_v"):
-        #                 m = self._ID_RE.match(nm[:-5])
-        #                 if m:
-        #                     out.append(int(m.group("ver")))
-        #         out.sort()
-        #         return out
-        #     except Exception:
-        #         pass  # fall back to local
+        if self.sb:
+            try:
+                remote_dir = f"{self.prefix}/{client}"
+                items = self.sb.storage.from_(self.bucket).list(path=remote_dir) or []
+                out = []
+                for it in items:
+                    nm = (it.get("name") or "").strip()
+                    if nm.endswith(".json") and nm.startswith(f"{client}_v"):
+                        m = self._ID_RE.match(nm[:-5])
+                        if m:
+                            out.append(int(m.group("ver")))
+                out.sort()
+                return out
+            except Exception:
+                pass  # fall back to local
 
         cdir = self._client_dir(client)
         if not os.path.isdir(cdir):
@@ -506,3 +506,4 @@ def overlaps(b1, b2, tol=0) -> bool:
     b1, b2: (x0,y0,x1,y1)
     """
     return not (b1[2] < b2[0]-tol or b1[0] > b2[2]+tol or b1[3] < b2[1]-tol or b1[1] > b2[3]+tol)
+
