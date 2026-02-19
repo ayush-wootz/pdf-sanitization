@@ -176,6 +176,7 @@ _SB_TPL_PREFIX = os.getenv("SUPABASE_TEMPLATES_PREFIX", "templates").rstrip("/")
 _SB_LOGOS_PREFIX = os.getenv("SUPABASE_LOGOS_PREFIX", "logos").rstrip("/")
 
 _sb = create_client(_SB_URL, _SB_KEY) if (create_client and _SB_URL and _SB_KEY) else None
+print("Supabase connected:", bool(_sb))
 
 def _sb_upload_and_sign(local_path: str, client: str, job_id: str) -> str | None:
     """
@@ -730,21 +731,21 @@ async def download_file(filename: str):
     return FileResponse(file_path, filename=filename, media_type=media)
 
 
-TEMPLATE_STORE = "templates"
+#TEMPLATE_STORE = "templates"
 
-@app.get("/api/clients")
-async def list_clients(device_id: str = Query(...)):
-    device_path = os.path.join(TEMPLATE_STORE, device_id)
-
-    if not os.path.exists(device_path):
-        return {"clients": []}
-
-    clients = [
-        name for name in os.listdir(device_path)
-        if os.path.isdir(os.path.join(device_path, name))
-    ]
-
-    return {"clients": clients}
+#@app.get("/api/clients")
+#async def list_clients(device_id: str = Query(...)):
+#    device_path = os.path.join(TEMPLATE_STORE, device_id)
+#
+#    if not os.path.exists(device_path):
+#        return {"clients": []}
+#
+#    clients = [
+#        name for name in os.listdir(device_path)
+#        if os.path.isdir(os.path.join(device_path, name))
+#    ]
+#
+#    return {"clients": clients}
 
 
 #@app.get("/api/clients")
@@ -775,6 +776,34 @@ async def list_clients(device_id: str = Query(...)):
 #    root.mkdir(parents=True, exist_ok=True)
 #    clients = sorted([p.name for p in root.iterdir() if p.is_dir()])
 #    return {"clients": clients}
+
+@app.get("/api/clients")
+async def list_clients(device_id: str = Query(...)):
+    tm = TemplateManager(device_id=device_id)
+
+    # Try Supabase first
+    if _sb:
+        try:
+            prefix = f"{_SB_TPL_PREFIX}/{device_id}"
+            top = _sb.storage.from_(_SB_BUCKET).list(path=prefix) or []
+
+            clients = []
+            for item in top:
+                name = item.get("name", "")
+                if name and "." not in name:  # skip files
+                    clients.append(name)
+
+            clients.sort()
+            return {"clients": clients}
+        except Exception:
+            pass  # fallback to local
+
+    # Fallback to local
+    root = Path(tm.store_dir)
+    root.mkdir(parents=True, exist_ok=True)
+    clients = sorted([p.name for p in root.iterdir() if p.is_dir()])
+
+    return {"clients": clients}
 
 
 @app.post("/api/upload-logo")
