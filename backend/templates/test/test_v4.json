@@ -1,0 +1,31 @@
+{
+  "rectangles": [
+    {
+      "page": 0,
+      "bbox": [
+        839,
+        76,
+        1085,
+        175
+      ],
+      "paper": "A3",
+      "orientation": "H",
+      "source_index": 0,
+      "source_pdf": "pdf_41x1216_drw_sanitized_sanitized_sanitized 2.pdf"
+    }
+  ],
+  "contents": [
+    {
+      "page": 0,
+      "bbox": [
+        839.0,
+        76.0,
+        1085.0,
+        175.0
+      ],
+      "text": "INTERPRET DRAWING PER ENGINEERING STDS.-DRAFTING UNLESS OTHERWISE SPECIFIED: ALL DIMENSIONS IN MILLIMETERS. CASTING TOLERANCES PER STD Z- 001-2. FORGING TOLERANCES +1.6 -0.8; DRAFTS 7 $ # 1 $ OTHERWISE TOLS # 0.40 ON 2-PLACE DECIMALS # 0.8 ON 1-PLACE DECIMALS # 1 $ ON ANGULAR DIMENS IONS ALL MACHINED INSIDE CORNERS 0.80 RAD IUS. BREAK ALL SHARP EDGES. REMOVE ALL BURRS,FINS,FLASH & PROJEC TIONS 41X-1040 / 41X-1200X",
+      "image_hash": "bf1a1be14d1ee092"
+    }
+  ],
+  "image_map": {}
+}

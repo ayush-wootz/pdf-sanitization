@@ -1,0 +1,31 @@
+{
+  "rectangles": [
+    {
+      "page": 0,
+      "bbox": [
+        67,
+        604,
+        383,
+        662
+      ],
+      "paper": "A3",
+      "orientation": "H",
+      "source_index": 0,
+      "source_pdf": "41x1618E_sanitized 4.pdf"
+    }
+  ],
+  "contents": [
+    {
+      "page": 0,
+      "bbox": [
+        67.0,
+        604.0,
+        383.0,
+        662.0
+      ],
+      "text": "QUALITY CONTROLLED CHARACTERISTICS LIST NO. QCC- APPLIES TO THIS DRAWING 9009-001",
+      "image_hash": "b34ce491dcd3cec0"
+    }
+  ],
+  "image_map": {}
+}

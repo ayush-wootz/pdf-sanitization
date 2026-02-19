@@ -1,0 +1,33 @@
+{
+  "rectangles": [
+    {
+      "page": 0,
+      "bbox": [
+        884,
+        731,
+        935,
+        777
+      ],
+      "paper": "A3",
+      "orientation": "H",
+      "source_index": 0,
+      "source_pdf": "6C3508_sanitized 2_sanitized 2_sanitized_sanitized.pdf"
+    }
+  ],
+  "contents": [
+    {
+      "page": 0,
+      "bbox": [
+        884.0,
+        731.0,
+        935.0,
+        777.0
+      ],
+      "text": "PROJECT",
+      "image_hash": "ae2e80d0d0fb2f27"
+    }
+  ],
+  "image_map": {
+    "0": "assets/logos/bf01938c00064a608ef2c87815bed334_Screenshot 2026-01-29 at 4.18.17 PM.png"
+  }
+}

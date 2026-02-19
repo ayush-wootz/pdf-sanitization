@@ -1,0 +1,55 @@
+{
+  "rectangles": [
+    {
+      "page": 0,
+      "bbox": [
+        944,
+        729,
+        1111,
+        757
+      ],
+      "paper": "A3",
+      "orientation": "H",
+      "source_index": 0,
+      "source_pdf": "41x1618E.pdf"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        1119,
+        730,
+        1201,
+        760
+      ],
+      "paper": "A3",
+      "orientation": "H",
+      "source_index": 0,
+      "source_pdf": "41x1618E.pdf"
+    }
+  ],
+  "contents": [
+    {
+      "page": 0,
+      "bbox": [
+        944.0,
+        729.0,
+        1111.0,
+        757.0
+      ],
+      "text": "",
+      "image_hash": "a385d47aed009f69"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        1119.0,
+        730.0,
+        1201.0,
+        760.0
+      ],
+      "text": "",
+      "image_hash": "bee0d00f0f7072a7"
+    }
+  ],
+  "image_map": {}
+}

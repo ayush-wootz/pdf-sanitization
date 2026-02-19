@@ -1,0 +1,33 @@
+{
+  "rectangles": [
+    {
+      "page": 0,
+      "bbox": [
+        162,
+        126,
+        301,
+        196
+      ],
+      "paper": "A4",
+      "orientation": "H",
+      "source_index": 0,
+      "source_pdf": "pdf_41x1878_drw 1.pdf"
+    }
+  ],
+  "contents": [
+    {
+      "page": 0,
+      "bbox": [
+        244.64000000000004,
+        162.0,
+        314.64000000000004,
+        301.0
+      ],
+      "text": "",
+      "image_hash": "9e51add9944963c9"
+    }
+  ],
+  "image_map": {
+    "0": "assets/logos/00e54ef2c1c34f5080a136d719991d3b_Screenshot 2026-01-29 at 4.18.17 PM.png"
+  }
+}

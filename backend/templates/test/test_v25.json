@@ -1,0 +1,31 @@
+{
+  "rectangles": [
+    {
+      "page": 0,
+      "bbox": [
+        427,
+        187,
+        557,
+        237
+      ],
+      "paper": "A4",
+      "orientation": "H",
+      "source_index": 2,
+      "source_pdf": "pdf_41x1334_drw_E.6 1.pdf"
+    }
+  ],
+  "contents": [
+    {
+      "page": 0,
+      "bbox": [
+        144.54000000000002,
+        427.0,
+        194.54000000000002,
+        557.0
+      ],
+      "text": "",
+      "image_hash": "91e5e51bdb588e84"
+    }
+  ],
+  "image_map": {}
+}

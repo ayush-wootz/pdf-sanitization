@@ -1,0 +1,55 @@
+{
+  "rectangles": [
+    {
+      "page": 0,
+      "bbox": [
+        594,
+        270,
+        1048,
+        508
+      ],
+      "paper": "A3",
+      "orientation": "H",
+      "source_index": 1,
+      "source_pdf": "7519043_sanitized 2.pdf"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        39,
+        290,
+        487,
+        386
+      ],
+      "paper": "A3",
+      "orientation": "H",
+      "source_index": 1,
+      "source_pdf": "7519043_sanitized 2.pdf"
+    }
+  ],
+  "contents": [
+    {
+      "page": 0,
+      "bbox": [
+        594.0,
+        270.0,
+        1048.0,
+        508.0
+      ],
+      "text": "",
+      "image_hash": "fa50e16a85455ee5"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        39.0,
+        290.0,
+        487.0,
+        386.0
+      ],
+      "text": "",
+      "image_hash": "bf33909e66c48dc1"
+    }
+  ],
+  "image_map": {}
+}

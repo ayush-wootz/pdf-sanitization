@@ -1,0 +1,81 @@
+{
+  "rectangles": [
+    {
+      "page": 0,
+      "bbox": [
+        14,
+        40,
+        565,
+        223
+      ],
+      "paper": "A4",
+      "orientation": "V",
+      "source_index": 1,
+      "source_pdf": "D22175 Tevema.pdf"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        128,
+        274,
+        215,
+        384
+      ],
+      "paper": "A4",
+      "orientation": "V",
+      "source_index": 1,
+      "source_pdf": "D22175 Tevema.pdf"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        294,
+        195,
+        608,
+        411
+      ],
+      "paper": "A3",
+      "orientation": "H",
+      "source_index": 0,
+      "source_pdf": "pdf_41x1216_drw_sanitized_sanitized_sanitized 2.pdf"
+    }
+  ],
+  "contents": [
+    {
+      "page": 0,
+      "bbox": [
+        14.0,
+        40.0,
+        565.0,
+        223.0
+      ],
+      "text": "Home  D22175 Menu   Custom made springs Technical information FAQ  14-day return policy,  Standard 2 years warranty. Back to main website English  Search product or SKU  SIGN IN   ",
+      "image_hash": "f34c73cc73990c19"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        128.0,
+        274.0,
+        215.0,
+        384.0
+      ],
+      "text": "",
+      "image_hash": "8000000000000000"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        294.0,
+        195.0,
+        608.0,
+        411.0
+      ],
+      "text": "( ) 24.00 23.63 ( ) 10.32 9.68 58.0",
+      "image_hash": "eb96694a954ab493"
+    }
+  ],
+  "image_map": {
+    "0": "assets/logos/7939159c033b49948bcaaa7c4a8dddb2_Screenshot 2026-01-29 at 4.18.17 PM.png"
+  }
+}

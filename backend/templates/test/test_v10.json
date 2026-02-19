@@ -1,0 +1,33 @@
+{
+  "rectangles": [
+    {
+      "page": 0,
+      "bbox": [
+        647,
+        304,
+        1067,
+        490
+      ],
+      "paper": "A3",
+      "orientation": "H",
+      "source_index": 0,
+      "source_pdf": "7519043.pdf"
+    }
+  ],
+  "contents": [
+    {
+      "page": 0,
+      "bbox": [
+        647.0,
+        304.0,
+        1067.0,
+        490.0
+      ],
+      "text": "",
+      "image_hash": "af1ef03bb4c90e24"
+    }
+  ],
+  "image_map": {
+    "0": "assets/logos/9a38cf9f6fb942669e363a4876d656e3_Screenshot 2026-01-29 at 4.18.17 PM.png"
+  }
+}

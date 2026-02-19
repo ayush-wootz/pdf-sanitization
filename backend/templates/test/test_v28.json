@@ -1,0 +1,79 @@
+{
+  "rectangles": [
+    {
+      "page": 0,
+      "bbox": [
+        634,
+        284,
+        1057,
+        493
+      ],
+      "paper": "A3",
+      "orientation": "H",
+      "source_index": 0,
+      "source_pdf": "7519043_sanitized 2.pdf"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        58,
+        92,
+        126,
+        176
+      ],
+      "paper": "A4",
+      "orientation": "H",
+      "source_index": 2,
+      "source_pdf": "pdf_41x1334_drw_E.6 1.pdf"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        153,
+        237,
+        232,
+        315
+      ],
+      "paper": "A4",
+      "orientation": "H",
+      "source_index": 2,
+      "source_pdf": "pdf_41x1334_drw_E.6 1.pdf"
+    }
+  ],
+  "contents": [
+    {
+      "page": 0,
+      "bbox": [
+        634.0,
+        284.0,
+        1057.0,
+        493.0
+      ],
+      "text": "",
+      "image_hash": "af9af03b94490cb5"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        205.54000000000002,
+        58.0,
+        289.54,
+        126.0
+      ],
+      "text": "",
+      "image_hash": "b133c6cc4d33333c"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        66.54000000000002,
+        153.0,
+        144.54000000000002,
+        232.0
+      ],
+      "text": "",
+      "image_hash": "e6b26c99c9992666"
+    }
+  ],
+  "image_map": {}
+}

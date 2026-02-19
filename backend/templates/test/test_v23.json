@@ -1,0 +1,79 @@
+{
+  "rectangles": [
+    {
+      "page": 0,
+      "bbox": [
+        630,
+        292,
+        1041,
+        494
+      ],
+      "paper": "A3",
+      "orientation": "H",
+      "source_index": 0,
+      "source_pdf": "7519043_sanitized 2.pdf"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        192,
+        162,
+        410,
+        372
+      ],
+      "paper": "A4",
+      "orientation": "V",
+      "source_index": 1,
+      "source_pdf": "D22175 Tevema.pdf"
+    },
+    {
+      "page": 3,
+      "bbox": [
+        38,
+        50,
+        575,
+        89
+      ],
+      "paper": "A4",
+      "orientation": "V",
+      "source_index": 1,
+      "source_pdf": "D22175 Tevema.pdf"
+    }
+  ],
+  "contents": [
+    {
+      "page": 0,
+      "bbox": [
+        630.0,
+        292.0,
+        1041.0,
+        494.0
+      ],
+      "text": "",
+      "image_hash": "ef1cf03aa5c10da5"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        192.0,
+        162.0,
+        410.0,
+        372.0
+      ],
+      "text": "",
+      "image_hash": "bf388cc2e86c83d3"
+    },
+    {
+      "page": 3,
+      "bbox": [
+        38.0,
+        50.0,
+        575.0,
+        89.0
+      ],
+      "text": "Copyright © 2021 TevemaPrivacy Policy Terms of Use Sitemap Custom made springs Technical information FAQ  policy,  warranty.",
+      "image_hash": "ab0994f0793d9cd1"
+    }
+  ],
+  "image_map": {}
+}

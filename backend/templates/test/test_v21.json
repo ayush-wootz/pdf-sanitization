@@ -1,0 +1,31 @@
+{
+  "rectangles": [
+    {
+      "page": 0,
+      "bbox": [
+        1121,
+        719,
+        1144,
+        742
+      ],
+      "paper": "A3",
+      "orientation": "H",
+      "source_index": 0,
+      "source_pdf": "7519043_sanitized 2.pdf"
+    }
+  ],
+  "contents": [
+    {
+      "page": 0,
+      "bbox": [
+        1121.0,
+        719.0,
+        1144.0,
+        742.0
+      ],
+      "text": "",
+      "image_hash": "e99696499e69d924"
+    }
+  ],
+  "image_map": {}
+}

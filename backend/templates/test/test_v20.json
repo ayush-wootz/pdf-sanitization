@@ -1,0 +1,55 @@
+{
+  "rectangles": [
+    {
+      "page": 0,
+      "bbox": [
+        215,
+        520,
+        379,
+        571
+      ],
+      "paper": "A4",
+      "orientation": "V",
+      "source_index": 1,
+      "source_pdf": "D22175 Tevema.pdf"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        189,
+        178,
+        415,
+        361
+      ],
+      "paper": "A4",
+      "orientation": "V",
+      "source_index": 1,
+      "source_pdf": "D22175 Tevema.pdf"
+    }
+  ],
+  "contents": [
+    {
+      "page": 0,
+      "bbox": [
+        215.0,
+        520.0,
+        379.0,
+        571.0
+      ],
+      "text": "10+ units €3.64 each",
+      "image_hash": "9fc6e039e21c1fc2"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        189.0,
+        178.0,
+        415.0,
+        361.0
+      ],
+      "text": "",
+      "image_hash": "bd389cc2d86c86e3"
+    }
+  ],
+  "image_map": {}
+}

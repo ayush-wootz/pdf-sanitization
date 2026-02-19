@@ -1,0 +1,31 @@
+{
+  "rectangles": [
+    {
+      "page": 0,
+      "bbox": [
+        180,
+        170,
+        427,
+        393
+      ],
+      "paper": "A4",
+      "orientation": "V",
+      "source_index": 1,
+      "source_pdf": "D22175 Tevema.pdf"
+    }
+  ],
+  "contents": [
+    {
+      "page": 0,
+      "bbox": [
+        180.0,
+        170.0,
+        427.0,
+        393.0
+      ],
+      "text": "",
+      "image_hash": "bd389cc1e1cc6693"
+    }
+  ],
+  "image_map": {}
+}

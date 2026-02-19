@@ -1,0 +1,55 @@
+{
+  "rectangles": [
+    {
+      "page": 0,
+      "bbox": [
+        114,
+        36,
+        337,
+        214
+      ],
+      "paper": "A4",
+      "orientation": "H",
+      "source_index": 1,
+      "source_pdf": "pdf_41x1334_drw_E.6 1.pdf"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        413,
+        179,
+        552,
+        243
+      ],
+      "paper": "A4",
+      "orientation": "H",
+      "source_index": 1,
+      "source_pdf": "pdf_41x1334_drw_E.6 1.pdf"
+    }
+  ],
+  "contents": [
+    {
+      "page": 0,
+      "bbox": [
+        167.54000000000002,
+        114.0,
+        345.54,
+        337.0
+      ],
+      "text": "",
+      "image_hash": "bc348371e44bb6a6"
+    },
+    {
+      "page": 0,
+      "bbox": [
+        138.54000000000002,
+        413.0,
+        202.54000000000002,
+        552.0
+      ],
+      "text": "",
+      "image_hash": "ffe4881ad0c1adac"
+    }
+  ],
+  "image_map": {}
+}

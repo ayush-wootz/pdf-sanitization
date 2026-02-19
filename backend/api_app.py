@@ -1,7 +1,7 @@
 # api_app.py
 import os, shutil, tempfile, zipfile, json, uuid
 from pathlib import Path
-from fastapi import FastAPI, UploadFile, Form, File, Request, BackgroundTasks
+from fastapi import FastAPI, UploadFile, Form, File, Request, BackgroundTasks, Query
 import fitz 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
@@ -111,11 +111,14 @@ def zip_append_with_versions(zip_path: str, file_paths: list[str]) -> str:
     return zip_path
 
 # helpers for passlog to show only low conf pages filtering out processed pages
-def _passlog_path_for(client: str) -> str:
-    return os.path.join(STATIC_DIR, f"{client}_passlog.json")
+def _passlog_path_for(device_id: str, client: str) -> str:
+    safe_device = "".join(ch for ch in device_id if ch.isalnum() or ch in "_-")
+    device_dir = os.path.join(STATIC_DIR, safe_device)
+    os.makedirs(device_dir, exist_ok=True)
+    return os.path.join(device_dir, f"{client}_passlog.json")
 
-def _load_passlog(client: str) -> dict:
-    path = _passlog_path_for(client)
+def _load_passlog(device_id: str, client: str) -> dict:
+    path = _passlog_path_for(device_id, client)
     if not os.path.exists(path):
         return {}
     try:
@@ -132,8 +135,8 @@ def _load_passlog(client: str) -> dict:
     except Exception:
         return {}
 
-def _save_passlog(client: str, data: dict) -> None:
-    path = _passlog_path_for(client)
+def _save_passlog(device_id: str, client: str, data: dict) -> None:
+    path = _passlog_path_for(device_id, client)
     for _ in range(3):
         try:
             with open(path, "w", encoding="utf-8") as f:
@@ -213,6 +216,7 @@ async def sanitize(
     image_map: str = Form("{}"),  # JSON: {tidx: "logos/<filename>"}
     threshold: float = Form(default=0.9),
     client_name: str = Form(...),
+    device_id: str = Form(...),
     secondary: bool = Form(default=False),
 ):
     # --- per-job workspace and uploads ---
@@ -270,7 +274,7 @@ async def sanitize(
         # then fall through to the common ZIP/response code below
     else:
         # 3) versioned template id
-        tm = TemplateManager()
+        tm = TemplateManager(device_id=device_id)
         template_id = tm.next_version_id(client)
     
         # 4) save profile (multi-pdf)
@@ -295,12 +299,13 @@ async def sanitize(
                     image_map=img_map,
                     input_root=None,
                     secondary=secondary,
+                    device_id=device_id
                 )
             low_conf = await loop.run_in_executor(EXECUTOR, _run_batch)
 
 
     # -- Passlog: filter out pages that have passed before & update the passlog with new passes
-    passlog = _load_passlog(client)
+    passlog = _load_passlog(device_id ,client)
     # Build a quick map of failing pages returned by pipeline, keyed by normalized base name
     failing_by_base = {}
     for item in (low_conf or []):
@@ -352,7 +357,7 @@ async def sanitize(
 
     # overwrite low_conf with the filtered view and persist the passlog
     low_conf = filtered_low_conf
-    _save_passlog(client, passlog)
+    _save_passlog(device_id, client, passlog)
 
     # 6) — Clean up old ZIPs first
     delete_old_zips(STATIC_DIR, hours=1)
@@ -446,9 +451,10 @@ async def sanitize_existing(
     text_replacements: str = Form(default="{}"),
     threshold: float = Form(default=0.9),
     client_name: str = Form(...),
+    device_id: str = Form(...),
     secondary: bool = Form(default=False),
 ):
-    tm = TemplateManager()
+    tm = TemplateManager(device_id=device_id)
     client = _safe_client_id(client_name)
     template_id = tm.latest_version_id(client)
 
@@ -498,11 +504,12 @@ async def sanitize_existing(
                 image_map=image_map,
                 input_root=None,
                 secondary=secondary,
+                device_id=device_id
             )
         low_conf = await loop.run_in_executor(EXECUTOR, _run2)
 
     # -- Passlog: filter out pages that have passed before & update the passlog with new passes
-    passlog = _load_passlog(client)
+    passlog = _load_passlog(device_id, client)
     # Build a quick map of failing pages returned by pipeline, keyed by normalized base name
     failing_by_base = {}
     for item in (low_conf or []):
@@ -554,7 +561,7 @@ async def sanitize_existing(
 
     # overwrite low_conf with the filtered view and persist the passlog
     low_conf = filtered_low_conf
-    _save_passlog(client, passlog)
+    _save_passlog(device_id, client, passlog)
 
 
     # 6) — Clean up old ZIPs first
@@ -723,35 +730,51 @@ async def download_file(filename: str):
     return FileResponse(file_path, filename=filename, media_type=media)
 
 
+TEMPLATE_STORE = "templates"
 
 @app.get("/api/clients")
-async def list_clients():
-    # Supabase-first listing of templates/<client>/, fallback to local disk
-    if _sb:
-        try:
-            top = _sb.storage.from_(_SB_BUCKET).list(path=_SB_TPL_PREFIX) or []
-            candidates = [it.get("name", "") for it in top if it.get("name")]
-            clients = []
-            for name in candidates:
-                if "." in name:
-                    continue  # skip files at templates/ root
-                sub = _sb.storage.from_(_SB_BUCKET).list(path=f"{_SB_TPL_PREFIX}/{name}") or []
-                has_template = any(
-                    ent.get("name", "").startswith(f"{name}_v") and ent.get("name", "").endswith(".json")
-                    for ent in sub
-                )
-                if has_template:
-                    clients.append(name)
-            clients.sort()
-            return {"clients": clients}
-        except Exception:
-            pass  # fall back to local
+async def list_clients(device_id: str = Query(...)):
+    device_path = os.path.join(TEMPLATE_STORE, device_id)
 
-    tm = TemplateManager()
-    root = Path(tm.store_dir)
-    root.mkdir(parents=True, exist_ok=True)
-    clients = sorted([p.name for p in root.iterdir() if p.is_dir()])
+    if not os.path.exists(device_path):
+        return {"clients": []}
+
+    clients = [
+        name for name in os.listdir(device_path)
+        if os.path.isdir(os.path.join(device_path, name))
+    ]
+
     return {"clients": clients}
+
+
+#@app.get("/api/clients")
+#async def list_clients():
+#    # Supabase-first listing of templates/<client>/, fallback to local disk
+#    if _sb:
+#        try:
+#            top = _sb.storage.from_(_SB_BUCKET).list(path=_SB_TPL_PREFIX) or []
+#            candidates = [it.get("name", "") for it in top if it.get("name")]
+#            clients = []
+#            for name in candidates:
+#                if "." in name:
+#                    continue  # skip files at templates/ root
+#                sub = _sb.storage.from_(_SB_BUCKET).list(path=f"{_SB_TPL_PREFIX}/{name}") or []
+#                has_template = any(
+#                    ent.get("name", "").startswith(f"{name}_v") and ent.get("name", "").endswith(".json")
+#                    for ent in sub
+#                )
+#                if has_template:
+#                    clients.append(name)
+#            clients.sort()
+#            return {"clients": clients}
+#        except Exception:
+#            pass  # fall back to local
+#
+#    tm = TemplateManager()
+#    root = Path(tm.store_dir)
+#    root.mkdir(parents=True, exist_ok=True)
+#    clients = sorted([p.name for p in root.iterdir() if p.is_dir()])
+#    return {"clients": clients}
 
 
 @app.post("/api/upload-logo")
