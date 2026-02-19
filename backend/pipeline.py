@@ -358,34 +358,43 @@ def process_batch(
            
     # ── Step 6: Place images into specified rectangles ──
         # Resolve Supabase storage keys (e.g., "logos/<client>/<file>") to local temp files
-        def _resolve_logo_to_local(val: str, _cache: dict) -> str:
-            # cache by key → local path to avoid re-downloading for multiple pages
+        def _resolve_logo_to_local(val: str, device_id: str, _cache: dict) -> str:
+            # cache by key → local path
             if val in _cache:
                 return _cache[val]
 
-            # If it looks like a Supabase storage key and client is configured, download
-            looks_like_storage_key = isinstance(val, str) and ("/" in val) and not val.lower().startswith(("http://", "https://"))
+            looks_like_storage_key = (
+                isinstance(val, str)
+                and ("/" in val)
+                and not val.lower().startswith(("http://", "https://"))
+            )
+
             if _sb and looks_like_storage_key:
-                # Treat 'val' as a storage key under the same bucket (e.g., "logos/acme/logo.png")
                 try:
+                    # Ensure device-based path
+                    if not val.startswith(f"logos/{device_id}/"):
+                        val = f"logos/{device_id}/{val}"
+
                     data = _sb.storage.from_(_SB_BUCKET).download(val)
+
                     tmp_dir = _cache.setdefault("__dir__", tempfile.mkdtemp(prefix="logos_"))
                     local = os.path.join(tmp_dir, os.path.basename(val))
+
                     with open(local, "wb") as f:
-                        # supabase-py may return bytes or str
                         if isinstance(data, bytes):
                             f.write(data)
                         else:
                             f.write(data.encode("utf-8"))
+
                     _cache[val] = local
                     return local
-                except Exception:
-                    # fall through to return the original value
-                    pass
 
-            # Not a storage key or download failed → return original (may already be a local path)
+                except Exception:
+                    pass  # fallback
+
             _cache[val] = val
             return val
+
 
         if image_map:
             print(f"[Place] image placement initiated: {image_map}")
