@@ -807,26 +807,30 @@ async def list_clients(device_id: str = Query(...)):
 
 
 @app.post("/api/upload-logo")
-async def upload_logo(file: UploadFile = File(...)):
-    """
-    Upload a single company logo and return the storage key to use in image_map.
-    Stored at: logos/<filename>
-    """
-    filename = file.filename
+async def upload_logo(
+    file: UploadFile = File(...),
+    device_id: str = Form(...)
+):
+    filename = _safe_filename(file.filename)
     data = file.file.read()
 
-    # if _sb:
-    #     key = f"{_SB_LOGOS_PREFIX}/{filename}"
-    #     _sb.storage.from_(_SB_BUCKET).upload(
-    #         key, data, {"contentType": file.content_type or "image/png", "upsert": "true"}
-    #     )
-    #     return {"key": key}
+    safe_device = "".join(ch for ch in device_id if ch.isalnum() or ch in "_-")
+
+    if _sb:
+        key = f"{_SB_LOGOS_PREFIX}/{safe_device}/{filename}"
+        _sb.storage.from_(_SB_BUCKET).upload(
+            key,
+            data,
+            {"contentType": file.content_type or "image/png", "upsert": "true"}
+        )
+        return {"key": key}
 
     # Local fallback
-    local_dir = os.path.join("assets", "logos")
+    local_dir = os.path.join("assets", "logos", safe_device)
     os.makedirs(local_dir, exist_ok=True)
-    unique_name = f"{uuid.uuid4().hex}_{filename}"
-    local_path = os.path.join(local_dir, unique_name)
+
+    local_path = os.path.join(local_dir, filename)
     with open(local_path, "wb") as f:
         f.write(data)
-    return {"key": f"assets/logos/{unique_name}"} # fixed local path
+
+    return {"key": f"assets/logos/{safe_device}/{filename}"}
