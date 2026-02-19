@@ -412,7 +412,7 @@ def process_batch(
                         mapped = image_map.get(str(ti))  # fallback if keys are str
                 print(f"[Place] idx={idx} (page={rc['page']}, tidx={ti}) → mapped={mapped}")
                 if mapped:
-                    enum_image_map[idx] = _resolve_logo_to_local(mapped, _logo_cache)
+                    enum_image_map[idx] = _resolve_logo_to_local(mapped, device_id, _logo_cache)
 
             if not enum_image_map:
                 print("[Place][SKIP] No rects eligible for image placement after confidence gating "
